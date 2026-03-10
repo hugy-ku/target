@@ -31,9 +31,9 @@ class Map:
     def generate_map(self):
         self.planets.append(Planet((50, 60)))
 
-    def render(self, surface: pygame.Surface, viewport: pygame.Rect):
+    def render(self, surface: pygame.Surface, viewport: pygame.Surface):
         # viewport for culling or something idk im doing premature optimisation im so dead
-        for visible_planet in viewport.collideobjectsall(self.planets, key=lambda o: o.rect):
+        for visible_planet in viewport.get_rect().collideobjectsall(self.planets, key=lambda o: o.rect):
             visible_planet: Planet
             visible_planet.render(surface)
         return surface
@@ -41,11 +41,11 @@ class Map:
 class RenderManager:
     def __init__(self, map_size: tuple):
         self.surface = pygame.Surface(map_size)
-        self.viewport = pygame.Rect(50, 0, 100, 100)
+        self.viewport = self.surface.subsurface(pygame.Rect(0, 0, 100, 100))
 
     def render(self, map: Map, screen: pygame.Surface):
         self.surface = map.render(self.surface, self.viewport)
-        screen.blit(self.surface.subsurface(self.viewport))
+        pygame.transform.scale(self.viewport, screen.size, dest_surface=screen) # woah blitting by scaling this is so cool
 
 class Planet:
     def __init__(self, position: tuple, size=10):
