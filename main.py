@@ -90,13 +90,15 @@ class RenderManager:
     def __init__(self, map: Map):
         self.surface = pygame.Surface(map.map_size)
         self.viewport = pygame.Rect(0, 0, 100, 100)
+        self.zoom_level = 1
 
     def render(self, map: Map, screen: pygame.Surface):
         screen.fill("#000000")
-        viewport_surface = self.surface.subsurface(self.viewport)
+        viewport = pygame.Rect(0, 0, screen.size[0]/self.zoom_level, screen.size[1]/self.zoom_level).clip(self.surface.get_rect())
+        viewport_surface = self.surface.subsurface(viewport)
         viewport_surface.fill("#777777")
-        self.surface = map.render(self.surface, self.viewport)
-        scale_ratio = min(screen.size[0]/self.viewport.width, screen.size[1]/self.viewport.height)
+        self.surface = map.render(self.surface, viewport)
+        scale_ratio = min(screen.size[0]/viewport.width, screen.size[1]/viewport.height)
         scaled_viewport = pygame.transform.scale_by(viewport_surface, scale_ratio)
         screen.blit(scaled_viewport, ((screen.size[0]-scaled_viewport.size[0])/2, (screen.size[1]-scaled_viewport.size[1])/2))
 
