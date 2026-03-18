@@ -9,7 +9,7 @@ class MainGame:
         self.running = True
         self.delta_time = 0
         self.map = Map()
-        self.map.generate_map((300, 300))
+        self.map.generate_map((700, 700))
         self.renderManager = RenderManager(self.map)
         self.mainloop()
 
@@ -19,14 +19,15 @@ class MainGame:
                 print(event) # debug
                 if event.type == pygame.QUIT:
                     self.running = False
+                self.handle_input(event)
             self.renderManager.render(self.map, self.screen)
             pygame.display.flip()
 
             self.delta_time = self.clock.tick(60)
 
-    def handle_input(self, event: pygame.Event):
+    def handle_input(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEWHEEL:
-            return
+            self.renderManager.change_zoom(event.y*0.05)
 
 class Planet:
     def __init__(self, position: tuple, size):
@@ -103,12 +104,18 @@ class Map:
 class RenderManager:
     def __init__(self, map: Map):
         self.surface = pygame.Surface(map.map_size)
-        self.zoom_level = 0.5
+        self.zoom_level = 1
+
+    def change_zoom(self, amount):
+        self.zoom_level = self.zoom_level*(1+amount)
+        self.zoom_level = min(self.zoom_level, 10)
+        self.zoom_level = max(1, self.zoom_level)
 
     def render(self, map: Map, screen: pygame.Surface):
-        print(self.zoom_level)
         screen.fill("#000000")
-        viewport = pygame.Rect(0, 0, screen.size[0]/self.zoom_level, screen.size[1]/self.zoom_level).clip(self.surface.get_rect())
+        viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1]).clip(self.surface.get_rect())
+        viewport.width = viewport.width/self.zoom_level
+        viewport.height = viewport.height/self.zoom_level
         viewport_surface = self.surface.subsurface(viewport)
         viewport_surface.fill("#777777")
         self.surface = map.render(self.surface, viewport)
