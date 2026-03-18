@@ -11,10 +11,14 @@ class MainGame:
         self.map = Map()
         self.map.generate_map((700, 700))
         self.renderManager = RenderManager(self.map)
+
+        self.mouse_pos = None
+
         self.mainloop()
 
     def mainloop(self):
         while self.running:
+            self.mouse_pos = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 print(event) # debug
                 if event.type == pygame.QUIT:
@@ -27,7 +31,7 @@ class MainGame:
 
     def handle_input(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEWHEEL:
-            self.renderManager.change_zoom(event.y*0.05)
+            self.renderManager.change_zoom(event.y*0.05, self.mouse_pos, self.screen.size)
 
 class Planet:
     def __init__(self, position: tuple, size):
@@ -105,21 +109,38 @@ class RenderManager:
     def __init__(self, map: Map):
         self.surface = pygame.Surface(map.map_size)
         self.zoom_level = 1
+        self.viewport_position = (0, 0)
+        self.viewport = pygame.Rect()
 
-    def change_zoom(self, amount):
+    def change_zoom(self, amount, mouse_pos, screen_size):
+
+        viewport_mouse = (mouse_pos[0]-(screen_size[0]-self.viewport.width*self.zoom_level)/2, mouse_pos[1]-(screen_size[1]-self.viewport.height*self.zoom_level)/2)
+        if viewport_mouse[0] < 0 or viewport_mouse[1] < 0 or viewport_mouse[0] > self.viewport.width*self.zoom_level or viewport_mouse[1] > self.viewport.height*self.zoom_level:
+            return
+
         self.zoom_level = self.zoom_level*(1+amount)
-        self.zoom_level = min(self.zoom_level, 10)
-        self.zoom_level = max(1, self.zoom_level)
+        if self.zoom_level > 10:
+            self.zoom_level = 10
+            return
+        if self.zoom_level < 1:
+            self.zoom_level = 1
+            return
+        self.viewport_position = (self.viewport_position[0]+viewport_mouse[0]*amount/self.zoom_level, self.viewport_position[1]+viewport_mouse[1]*amount/self.zoom_level)
+        self.viewport_position = (max(0, min(self.viewport_position[0], self.surface.size[0]-self.viewport.width)), max(0, min(self.viewport_position[1], self.surface.size[1]-self.viewport.height)))
+        # print(self.viewport_position[0], self.surface.size[0]-self.viewport.width)
 
     def render(self, map: Map, screen: pygame.Surface):
         screen.fill("#000000")
-        viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1]).clip(self.surface.get_rect())
-        viewport.width = viewport.width/self.zoom_level
-        viewport.height = viewport.height/self.zoom_level
-        viewport_surface = self.surface.subsurface(viewport)
+        self.viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1]).clip(self.surface.get_rect())
+        self.viewport.left, self.viewport.top = self.viewport_position
+        self.viewport.width = self.viewport.width/self.zoom_level
+        self.viewport.height = self.viewport.height/self.zoom_level
+        # have to do this due to the ordering of processing
+        self.viewport.left, self.viewport.top = (max(0, min(self.viewport_position[0], self.surface.size[0]-self.viewport.width)), max(0, min(self.viewport_position[1], self.surface.size[1]-self.viewport.height)))
+        viewport_surface = self.surface.subsurface(self.viewport)
         viewport_surface.fill("#777777")
-        self.surface = map.render(self.surface, viewport)
-        scale_ratio = min(screen.size[0]/viewport.width, screen.size[1]/viewport.height)
+        self.surface = map.render(self.surface, self.viewport)
+        scale_ratio = min(screen.size[0]/self.viewport.width, screen.size[1]/self.viewport.height)
         scaled_viewport = pygame.transform.scale_by(viewport_surface, scale_ratio)
         screen.blit(scaled_viewport, ((screen.size[0]-scaled_viewport.size[0])/2, (screen.size[1]-scaled_viewport.size[1])/2))
 
