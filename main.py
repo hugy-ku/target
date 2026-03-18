@@ -16,6 +16,7 @@ class MainGame:
     def mainloop(self):
         while self.running:
             for event in pygame.event.get():
+                print(event) # debug
                 if event.type == pygame.QUIT:
                     self.running = False
             self.renderManager.render(self.map, self.screen)
@@ -23,8 +24,12 @@ class MainGame:
 
             self.delta_time = self.clock.tick(60)
 
+    def handle_input(self, event: pygame.Event):
+        if event.type == pygame.MOUSEWHEEL:
+            return
+
 class Planet:
-    def __init__(self, position: tuple, size=10):
+    def __init__(self, position: tuple, size):
         self.position = position
         self.size = size
         self.color = "#88DD88"
@@ -35,13 +40,14 @@ class Planet:
         self.routes.append(route)
 
     def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, self.color, self.position, self.size)
+        pygame.draw.aacircle(surface, self.color, self.position, self.size)
 
 
 class Route:
-    def __init__(self, planet1: Planet, planet2: Planet):
+    def __init__(self, planet1: Planet, planet2: Planet, size):
         self.planet1 = planet1
         self.planet2 = planet2
+        self.size = size
         # heavenly code
         x1 = min(self.planet1.position[0]-self.planet1.size, self.planet2.position[0]-self.planet2.size)
         y1 = min(self.planet1.position[1]-self.planet1.size, self.planet2.position[1]-self.planet2.size)
@@ -50,7 +56,7 @@ class Route:
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
 
     def render(self, surface: pygame.Surface):
-        pygame.draw.line(surface, "#BBBBBB", self.planet1.position, self.planet2.position, 5)
+        pygame.draw.line(surface, "#BBBBBB", self.planet1.position, self.planet2.position, self.size)
 
 
 class Map:
@@ -61,14 +67,22 @@ class Map:
 
     def generate_map(self, map_size):
         self.map_size = map_size
-        planet1 = Planet((30, 50))
-        planet2 = Planet((70, 50))
+        planet1 = Planet((50, 50), 30)
+        planet2 = Planet((200, 50), 30)
+        planet3 = Planet((100, 200), 30)
         self.planets.append(planet1)
         self.planets.append(planet2)
+        self.planets.append(planet3)
         self.add_route(planet1, planet2)
+        self.add_route(planet1, planet3)
+        self.add_route(planet2, planet3)
 
-    def add_route(self, planet1: Planet, planet2: Planet):
-        route = Route(planet1, planet2)
+    def add_planet(self, position, size=30):
+        planet = Planet(position, size)
+        self.planets.append(planet)
+
+    def add_route(self, planet1: Planet, planet2: Planet, size=10):
+        route = Route(planet1, planet2, size)
         planet1.add_route(route)
         planet2.add_route(route)
         self.routes.append(route)
@@ -89,10 +103,10 @@ class Map:
 class RenderManager:
     def __init__(self, map: Map):
         self.surface = pygame.Surface(map.map_size)
-        self.viewport = pygame.Rect(0, 0, 100, 100)
-        self.zoom_level = 1
+        self.zoom_level = 0.5
 
     def render(self, map: Map, screen: pygame.Surface):
+        print(self.zoom_level)
         screen.fill("#000000")
         viewport = pygame.Rect(0, 0, screen.size[0]/self.zoom_level, screen.size[1]/self.zoom_level).clip(self.surface.get_rect())
         viewport_surface = self.surface.subsurface(viewport)
