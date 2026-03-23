@@ -96,6 +96,7 @@ class Map:
     def render(self, surface: pygame.Surface, viewport: pygame.Rect):
         # viewport for culling or something idk im doing premature optimisation im so dead
         # heavenly code 2.0
+        surface.fill("#777777")
         for visible_route in viewport.collideobjectsall(self.routes, key=lambda route: route.rect):
             visible_route: Route
             visible_route.render(surface)
@@ -131,17 +132,22 @@ class RenderManager:
 
     def render(self, map: Map, screen: pygame.Surface):
         screen.fill("#000000")
-        self.viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1]).clip(self.surface.get_rect())
-        self.viewport.left, self.viewport.top = self.viewport_position
-        self.viewport.width = self.viewport.width/self.zoom_level
-        self.viewport.height = self.viewport.height/self.zoom_level
+        self.viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1])
+        # if self.viewport.width > self.surface.width or self.viewport.height > self.surface.height:
+        self.viewport = self.viewport.clip(self.surface.get_rect())
+        self.viewport = self.viewport.fit(self.viewport.copy().scale_by(1/self.zoom_level))
+        self.viewport.topleft = self.viewport_position
+        # self.viewport.width = self.viewport.width/self.zoom_level
+        # self.viewport.height = self.viewport.height/self.zoom_level
+        # self.viewport.left, self.viewport.top = self.viewport_position
         # have to do this due to the ordering of processing
         self.viewport.left, self.viewport.top = (max(0, min(self.viewport_position[0], self.surface.size[0]-self.viewport.width)), max(0, min(self.viewport_position[1], self.surface.size[1]-self.viewport.height)))
         viewport_surface = self.surface.subsurface(self.viewport)
-        viewport_surface.fill("#777777")
+        # viewport_surface.fill("#777777")
         self.surface = map.render(self.surface, self.viewport)
         scale_ratio = min(screen.size[0]/self.viewport.width, screen.size[1]/self.viewport.height)
-        scaled_viewport = pygame.transform.scale_by(viewport_surface, scale_ratio)
+        scaled_viewport = pygame.transform.scale(viewport_surface, (viewport_surface.size[0]*scale_ratio, viewport_surface.size[1]*scale_ratio))
+        # print(viewport_surface.size, scale_ratio, (viewport_surface.size[0]*scale_ratio, viewport_surface.size[1]*scale_ratio))
         screen.blit(scaled_viewport, ((screen.size[0]-scaled_viewport.size[0])/2, (screen.size[1]-scaled_viewport.size[1])/2))
 
 game = MainGame()
