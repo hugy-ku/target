@@ -9,7 +9,7 @@ class MainGame:
         self.running = True
         self.delta_time = 0
         self.map = Map()
-        self.map.generate_map((700, 700))
+        self.map.generate_map((500, 500))
         self.renderManager = RenderManager(self.map)
 
         self.mouse_pos = None
@@ -24,17 +24,32 @@ class MainGame:
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.handle_input(event)
+            self.handle_hold_inputs()
             self.renderManager.render(self.map, self.screen)
             pygame.display.flip()
 
             self.delta_time = self.clock.tick(60)
 
     def handle_input(self, event: pygame.event.Event):
+
         if event.type == pygame.MOUSEWHEEL:
             self.renderManager.change_zoom(event.y*0.05, self.mouse_pos, self.screen.size)
 
+
+    def handle_hold_inputs(self):
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_w]:
+            self.renderManager.change_position((0, -self.delta_time/2))
+        if pressed[pygame.K_a]:
+            self.renderManager.change_position((-self.delta_time/2, 0))
+        if pressed[pygame.K_s]:
+            self.renderManager.change_position((0, self.delta_time/2))
+        if pressed[pygame.K_d]:
+            self.renderManager.change_position((self.delta_time/2, 0))
+
+
 class Planet:
-    def __init__(self, position: tuple, size):
+    def __init__(self, position: tuple[int, int], size: int):
         self.position = position
         self.size = size
         self.color = "#88DD88"
@@ -44,8 +59,20 @@ class Planet:
     def add_route(self, route):
         self.routes.append(route)
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.aacircle(surface, self.color, self.position, self.size)
+    def get_zoomed_position(self, zoom_level: int, surface_size: tuple[int, int]):
+        return tuple(map(lambda pos: pos*zoom_level - (surface_size[0]/2)*(zoom_level-1), self.position))
+
+    def get_render_info(self):
+        return {
+            "position": self.position,
+            "size": self.size,
+            "color": self.color
+        }
+        # scale_level = screen.height/map_size[0]
+        # new_zoom_level = zoom_level * scale_level
+        # new_position = self.get_zoomed_position(new_zoom_level, screen.size)
+        # new_size = self.size * new_zoom_level
+        # pygame.draw.circle(screen, self.color, new_position, new_size)
 
 
 class Route:
@@ -60,20 +87,24 @@ class Route:
         y2 = max(self.planet1.position[1]+self.planet1.size, self.planet2.position[1]+self.planet2.size)
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.line(surface, "#BBBBBB", self.planet1.position, self.planet2.position, self.size)
-
+    def get_render_info(self):
+        return {
+            "position1": self.planet1.position,
+            "position2": self.planet2.position,
+            "size": self.size,
+            "color": "#BBBBBB"
+        }
 
 class Map:
     def __init__(self):
-        self.map_size = None
+        self.map_rect = None
         self.planets: list[Planet] = []
         self.routes: list[Route] = []
 
     def generate_map(self, map_size):
-        self.map_size = map_size
-        planet1 = Planet((50, 50), 30)
-        planet2 = Planet((200, 50), 30)
+        self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
+        planet1 = Planet((0, 0), 30)
+        planet2 = Planet((300, 300), 30)
         planet3 = Planet((100, 200), 30)
         self.planets.append(planet1)
         self.planets.append(planet2)
@@ -93,61 +124,53 @@ class Map:
         self.routes.append(route)
 
 
-    def render(self, surface: pygame.Surface, viewport: pygame.Rect):
-        # viewport for culling or something idk im doing premature optimisation im so dead
-        # heavenly code 2.0
-        surface.fill("#777777")
-        for visible_route in viewport.collideobjectsall(self.routes, key=lambda route: route.rect):
-            visible_route: Route
-            visible_route.render(surface)
-        for visible_planet in viewport.collideobjectsall(self.planets, key=lambda planet: planet.rect):
-            visible_planet: Planet
-            visible_planet.render(surface)
-        return surface
+    def get_render_info(self):
+        planets = []
+        routes = []
+        for planet in self.planets:
+            planets.append(planet.get_render_info())
+        for route in self.routes:
+            routes.append(route.get_render_info())
+        return planets, routes
 
 
 class RenderManager:
     def __init__(self, map: Map):
-        self.surface = pygame.Surface(map.map_size)
+        self.map = map
         self.zoom_level = 1
-        self.viewport_position = (0, 0)
         self.viewport = pygame.Rect()
 
+    def change_position(self, pos_amount):
+        self.viewport.move_ip(pos_amount)
+        print(self.viewport)
+
     def change_zoom(self, amount, mouse_pos, screen_size):
-
-        viewport_mouse = (mouse_pos[0]-(screen_size[0]-self.viewport.width*self.zoom_level)/2, mouse_pos[1]-(screen_size[1]-self.viewport.height*self.zoom_level)/2)
-        if viewport_mouse[0] < 0 or viewport_mouse[1] < 0 or viewport_mouse[0] > self.viewport.width*self.zoom_level or viewport_mouse[1] > self.viewport.height*self.zoom_level:
-            return
-
         self.zoom_level = self.zoom_level*(1+amount)
-        if self.zoom_level > 10:
-            self.zoom_level = 10
-            return
-        if self.zoom_level < 1:
-            self.zoom_level = 1
-            return
-        self.viewport_position = (self.viewport_position[0]+viewport_mouse[0]*amount/self.zoom_level, self.viewport_position[1]+viewport_mouse[1]*amount/self.zoom_level)
-        self.viewport_position = (max(0, min(self.viewport_position[0], self.surface.size[0]-self.viewport.width)), max(0, min(self.viewport_position[1], self.surface.size[1]-self.viewport.height)))
-        # print(self.viewport_position[0], self.surface.size[0]-self.viewport.width)
+        self.zoom_level = max(1, min(self.zoom_level, 10))
 
     def render(self, map: Map, screen: pygame.Surface):
-        screen.fill("#000000")
-        self.viewport = pygame.Rect(0, 0, screen.size[0], screen.size[1])
-        # if self.viewport.width > self.surface.width or self.viewport.height > self.surface.height:
-        self.viewport = self.viewport.clip(self.surface.get_rect())
-        self.viewport = self.viewport.fit(self.viewport.copy().scale_by(1/self.zoom_level))
-        self.viewport.topleft = self.viewport_position
-        # self.viewport.width = self.viewport.width/self.zoom_level
-        # self.viewport.height = self.viewport.height/self.zoom_level
-        # self.viewport.left, self.viewport.top = self.viewport_position
-        # have to do this due to the ordering of processing
-        self.viewport.left, self.viewport.top = (max(0, min(self.viewport_position[0], self.surface.size[0]-self.viewport.width)), max(0, min(self.viewport_position[1], self.surface.size[1]-self.viewport.height)))
-        viewport_surface = self.surface.subsurface(self.viewport)
-        # viewport_surface.fill("#777777")
-        self.surface = map.render(self.surface, self.viewport)
-        scale_ratio = min(screen.size[0]/self.viewport.width, screen.size[1]/self.viewport.height)
-        scaled_viewport = pygame.transform.scale(viewport_surface, (viewport_surface.size[0]*scale_ratio, viewport_surface.size[1]*scale_ratio))
-        # print(viewport_surface.size, scale_ratio, (viewport_surface.size[0]*scale_ratio, viewport_surface.size[1]*scale_ratio))
-        screen.blit(scaled_viewport, ((screen.size[0]-scaled_viewport.size[0])/2, (screen.size[1]-scaled_viewport.size[1])/2))
+        screen.fill("#777777")
+        self.viewport.width = screen.width
+        self.viewport.height = screen.height
+        planets, routes = map.get_render_info()
+        scale_amount = screen.height/map.map_rect.height * self.zoom_level
 
-game = MainGame()
+        for route_info in routes:
+            position1 = route_info["position1"]
+            position1 = (position1[0]-self.viewport.left, position1[1]-self.viewport.top)
+            position1 = (position1[0]*scale_amount, position1[1]*scale_amount)
+            position2 = route_info["position2"]
+            position2 = (position2[0]-self.viewport.left, position2[1]-self.viewport.top)
+            position2 = (position2[0]*scale_amount, position2[1]*scale_amount)
+            size = route_info["size"] * scale_amount
+            pygame.draw.line(screen, route_info["color"], position1, position2, int(size))
+
+        for planet_info in planets:
+            position = planet_info["position"]
+            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
+            position = (position[0]*scale_amount, position[1]*scale_amount)
+            size = planet_info["size"] * scale_amount
+            pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
+
+if __name__ == "__main__":
+    game = MainGame()
