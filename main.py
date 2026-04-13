@@ -9,10 +9,8 @@ class MainGame:
         self.running = True
         self.delta_time = 0
         self.map = Map()
-        self.map.generate_map((500, 500))
+        self.map.generate_map((2000, 2000))
         self.renderManager = RenderManager(self.map)
-
-        self.mouse_pos = None
 
         self.mainloop()
 
@@ -25,6 +23,7 @@ class MainGame:
                     self.running = False
                 self.handle_input(event)
             self.handle_hold_inputs()
+            self.tick()
             self.renderManager.render(self.map, self.screen)
             pygame.display.flip()
 
@@ -33,8 +32,7 @@ class MainGame:
     def handle_input(self, event: pygame.event.Event):
 
         if event.type == pygame.MOUSEWHEEL:
-            self.renderManager.change_zoom(event.y*0.05, self.mouse_pos, self.screen.size)
-
+            self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
 
     def handle_hold_inputs(self):
         pressed = pygame.key.get_pressed()
@@ -46,6 +44,9 @@ class MainGame:
             self.renderManager.change_position((0, self.delta_time/2))
         if pressed[pygame.K_d]:
             self.renderManager.change_position((self.delta_time/2, 0))
+
+    def tick(self):
+        self.renderManager.convert_mouse_pos(pygame.mouse.get_pos())
 
 
 class Planet:
@@ -103,9 +104,9 @@ class Map:
 
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
-        planet1 = Planet((0, 0), 30)
-        planet2 = Planet((300, 300), 30)
-        planet3 = Planet((100, 200), 30)
+        planet1 = Planet((0, 0), 100)
+        planet2 = Planet((2000, 2000), 100)
+        planet3 = Planet((1000, 1500), 100)
         self.planets.append(planet1)
         self.planets.append(planet2)
         self.planets.append(planet3)
@@ -113,11 +114,11 @@ class Map:
         self.add_route(planet1, planet3)
         self.add_route(planet2, planet3)
 
-    def add_planet(self, position, size=30):
+    def add_planet(self, position, size=100):
         planet = Planet(position, size)
         self.planets.append(planet)
 
-    def add_route(self, planet1: Planet, planet2: Planet, size=10):
+    def add_route(self, planet1: Planet, planet2: Planet, size=30):
         route = Route(planet1, planet2, size)
         planet1.add_route(route)
         planet2.add_route(route)
@@ -138,15 +139,30 @@ class RenderManager:
     def __init__(self, map: Map):
         self.map = map
         self.zoom_level = 1
-        self.viewport = pygame.Rect()
+        self.viewport = map.map_rect.copy()
 
     def change_position(self, pos_amount):
         self.viewport.move_ip(pos_amount)
-        print(self.viewport)
 
-    def change_zoom(self, amount, mouse_pos, screen_size):
-        self.zoom_level = self.zoom_level*(1+amount)
-        self.zoom_level = max(1, min(self.zoom_level, 10))
+    def change_zoom(self, zoom_amount, mouse_pos):
+        map_mouse_pos = self.convert_mouse_pos(mouse_pos)
+        zoom_before = self.zoom_level
+        self.zoom_level = self.zoom_level*(1+zoom_amount)
+        self.zoom_level = max(0.5, min(self.zoom_level, 5))
+        if self.zoom_level == zoom_before:
+            return
+
+        new_map_mouse_pos = self.convert_mouse_pos(mouse_pos)
+        self.viewport.left -= new_map_mouse_pos[0]-map_mouse_pos[0]
+        self.viewport.top -= new_map_mouse_pos[1]-map_mouse_pos[1]
+        print(map_mouse_pos, self.convert_mouse_pos(mouse_pos))
+
+    def convert_mouse_pos(self, mouse_pos):
+        # mouse_x uses height because viewport is scaled by height and width would be including OOB parts
+        mouse_x = (mouse_pos[0]/self.zoom_level*(self.map.map_rect.width/self.viewport.height)) + self.viewport.left
+        mouse_y = (mouse_pos[1]/self.zoom_level*(self.map.map_rect.height/self.viewport.height)) + self.viewport.top
+        # print(mouse_x, mouse_y)
+        return mouse_x, mouse_y
 
     def render(self, map: Map, screen: pygame.Surface):
         screen.fill("#777777")
