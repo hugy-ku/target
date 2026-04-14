@@ -36,6 +36,9 @@ class MainGame:
 
     def handle_hold_inputs(self):
         pressed = pygame.key.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        map_mouse_pos = self.renderManager.convert_mouse_pos(mouse_pos)
+
         if pressed[pygame.K_w]:
             self.renderManager.change_position((0, -self.delta_time/2))
         if pressed[pygame.K_a]:
@@ -44,6 +47,8 @@ class MainGame:
             self.renderManager.change_position((0, self.delta_time/2))
         if pressed[pygame.K_d]:
             self.renderManager.change_position((self.delta_time/2, 0))
+
+        self.map.check_hover(map_mouse_pos)
 
     def tick(self):
         self.renderManager.convert_mouse_pos(pygame.mouse.get_pos())
@@ -101,11 +106,20 @@ class Map:
         self.map_rect = None
         self.planets: list[Planet] = []
         self.routes: list[Route] = []
+        self.active = None
+        self.hover = None
+
+    def check_hover(self, map_mouse_pos):
+        for planet in self.planets:
+            if planet.rect.collidepoint(map_mouse_pos):
+                self.hover = planet
+                return
+        self.hover = None
 
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         planet1 = Planet((0, 0), 100)
-        planet2 = Planet((2000, 2000), 100)
+        planet2 = Planet((1800, 1800), 100)
         planet3 = Planet((1000, 1500), 100)
         self.planets.append(planet1)
         self.planets.append(planet2)
@@ -124,7 +138,6 @@ class Map:
         planet2.add_route(route)
         self.routes.append(route)
 
-
     def get_render_info(self):
         planets = []
         routes = []
@@ -132,7 +145,18 @@ class Map:
             planets.append(planet.get_render_info())
         for route in self.routes:
             routes.append(route.get_render_info())
-        return planets, routes
+
+        if self.hover:
+            hover_info = self.hover.get_render_info()
+        else:
+            hover_info = None
+
+        return {
+            "planets": planets,
+            "routes": routes,
+            "hover": hover_info,
+            "active": None
+        }
 
 
 class RenderManager:
@@ -168,10 +192,10 @@ class RenderManager:
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
-        planets, routes = map.get_render_info()
+        render_info = map.get_render_info()
         scale_amount = screen.height/map.map_rect.height * self.zoom_level
 
-        for route_info in routes:
+        for route_info in render_info["routes"]:
             position1 = route_info["position1"]
             position1 = (position1[0]-self.viewport.left, position1[1]-self.viewport.top)
             position1 = (position1[0]*scale_amount, position1[1]*scale_amount)
@@ -181,12 +205,20 @@ class RenderManager:
             size = route_info["size"] * scale_amount
             pygame.draw.line(screen, route_info["color"], position1, position2, int(size))
 
-        for planet_info in planets:
+        for planet_info in render_info["planets"]:
             position = planet_info["position"]
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
+
+        if render_info["hover"]:
+            planet_info = render_info["hover"]
+            position = planet_info["position"]
+            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
+            position = (position[0]*scale_amount, position[1]*scale_amount)
+            size = planet_info["size"] * scale_amount
+            pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.4, int(size*0.15))
 
 if __name__ == "__main__":
     game = MainGame()
