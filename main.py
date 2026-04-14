@@ -1,6 +1,6 @@
 import pygame
 import time
-from math import pi
+from math import pi, dist
 
 class MainGame:
     def __init__(self):
@@ -12,14 +12,18 @@ class MainGame:
         self.map = Map()
         self.map.generate_map((2000, 2000))
         self.renderManager = RenderManager(self.map)
+
         self.mouse_pos = None
         self.current_time = 0
+        self.time_since_last_tick = 0
 
         self.mainloop()
 
     def mainloop(self):
         while self.running:
             self.current_time += self.delta_time
+            self.time_since_last_tick += self.delta_time
+
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
@@ -29,6 +33,7 @@ class MainGame:
                 self.handle_input(event)
 
             self.tick()
+
             self.renderManager.render(self.screen, self.current_time)
 
             pygame.display.flip()
@@ -62,32 +67,47 @@ class MainGame:
             self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
         if event.type == pygame.MOUSEMOTION:
             self.mouse_pos = event.pos
+        if event.type == pygame.WINDOWLEAVE:
+            self.mouse_pos = None
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.map.check_active()
 
     def tick(self):
-        pass
+        self.map.tick()
 
 
 class Planet:
-    def __init__(self, position: tuple[int, int], size: int):
+    def __init__(self, position: tuple[int, int], size: int, ticks_per_drone=100):
         self.position = position
         self.size = size
         self.color = "#88DD88"
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list[Route] = []
+        self.drones = 0
+        self.tick_count = 0
+        self.ticks_per_drone = ticks_per_drone
 
     def add_route(self, route):
         self.routes.append(route)
 
-    def get_zoomed_position(self, zoom_level: int, surface_size: tuple[int, int]):
-        return tuple(map(lambda pos: pos*zoom_level - (surface_size[0]/2)*(zoom_level-1), self.position))
+    def tick(self):
+        self.tick_count += 1
+        if self.tick_count % self.ticks_per_drone == 0:
+            self.drones += 1
+
+    def send_drones(self, amount, route: Route):
+        self.drones -= amount
+        route.get_drones(amount, self)
+
+    def get_drones(self, amount):
+        self.drones += amount
 
     def get_render_info(self):
         return {
             "position": self.position,
             "size": self.size,
-            "color": self.color
+            "color": self.color,
+            "drones": self.drones
         }
 
 class Route:
@@ -95,12 +115,41 @@ class Route:
         self.planet1 = planet1
         self.planet2 = planet2
         self.size = size
+        self.drones = []
         # heavenly code
         x1 = min(self.planet1.position[0]-self.planet1.size, self.planet2.position[0]-self.planet2.size)
         y1 = min(self.planet1.position[1]-self.planet1.size, self.planet2.position[1]-self.planet2.size)
         x2 = max(self.planet1.position[0]+self.planet1.size, self.planet2.position[0]+self.planet2.size)
         y2 = max(self.planet1.position[1]+self.planet1.size, self.planet2.position[1]+self.planet2.size)
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
+        self.ticks_distance = dist((x1, y1), (x2, y2))/3
+
+    def get_drones(self, amount, origin_planet):
+        if origin_planet == self.planet1:
+            self.drones.append({
+                "ticks": 0,
+                "amount": amount,
+                "reverse": False
+            })
+        else:
+            self.drones.append({
+                "ticks": self.ticks_distance,
+                "amount": amount,
+                "reverse": True
+            })
+
+    def tick(self):
+        for drone in self.drones:
+            if not drone["reverse"]:
+                drone["ticks"] += 1
+                if drone["ticks"] >= self.ticks_distance:
+                    self.drones.remove(drone)
+                    self.planet2.get_drones(drone["amount"])
+            else:
+                drone["ticks"] -= 1
+                if drone["ticks"] <= 0:
+                    self.drones.remove(drone)
+                    self.planet1.get_drones(drone["amount"])
 
     def get_render_info(self):
         return {
@@ -118,6 +167,22 @@ class Map:
         self.active = None
         self.hover = None
 
+    def add_planet(self, position, size=100):
+        planet = Planet(position, size)
+        self.planets.append(planet)
+
+    def add_route(self, planet1: Planet, planet2: Planet, size=30):
+        route = Route(planet1, planet2, size)
+        planet1.add_route(route)
+        planet2.add_route(route)
+        self.routes.append(route)
+
+    def get_route(self, planet1: Planet, planet2: Planet):
+        for route in planet1.routes:
+            if route.planet1 == planet2 or route.planet2 == planet2:
+                return route
+        return None
+
     def check_hover(self, map_mouse_pos):
         for planet in self.planets:
             if planet.rect.collidepoint(map_mouse_pos):
@@ -127,9 +192,21 @@ class Map:
 
     def check_active(self):
         if self.hover and self.active != self.hover:
-            self.active = self.hover
+            self.select_planet(self.active, self.hover)
         else:
             self.active = None
+
+    def select_planet(self, sender, receiver):
+        if not self.active:
+            self.active = self.hover
+            return
+        route = self.get_route(sender, receiver)
+        if not route:
+            self.active = self.hover
+            return
+
+        self.active.send_drones(self.active.drones, route)
+        self.active = None
 
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
@@ -143,15 +220,11 @@ class Map:
         self.add_route(planet1, planet3)
         self.add_route(planet2, planet3)
 
-    def add_planet(self, position, size=100):
-        planet = Planet(position, size)
-        self.planets.append(planet)
-
-    def add_route(self, planet1: Planet, planet2: Planet, size=30):
-        route = Route(planet1, planet2, size)
-        planet1.add_route(route)
-        planet2.add_route(route)
-        self.routes.append(route)
+    def tick(self):
+        for planet in self.planets:
+            planet.tick()
+        for route in self.routes:
+            route.tick()
 
     def get_render_info(self):
         planets = []
@@ -242,6 +315,9 @@ class RenderManager:
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
+            font = pygame.font.Font(None, int(size))
+            font_size = font.size(str(planet_info["drones"]))
+            screen.blit(font.render(str(planet_info["drones"]), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
 
         if render_info["hover"]:
             planet_info = render_info["hover"]
