@@ -1,5 +1,6 @@
 import pygame
 import time
+from math import pi
 
 class MainGame:
     def __init__(self):
@@ -12,11 +13,13 @@ class MainGame:
         self.map.generate_map((2000, 2000))
         self.renderManager = RenderManager(self.map)
         self.mouse_pos = None
+        self.current_time = 0
 
         self.mainloop()
 
     def mainloop(self):
         while self.running:
+            self.current_time += self.delta_time
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
@@ -26,7 +29,7 @@ class MainGame:
                 self.handle_input(event)
 
             self.tick()
-            self.renderManager.render(self.screen, self.delta_time)
+            self.renderManager.render(self.screen, self.current_time)
 
             pygame.display.flip()
             self.delta_time = self.clock.tick(60)
@@ -123,11 +126,10 @@ class Map:
         self.hover = None
 
     def check_active(self):
-        if self.hover:
-            if self.active == self.hover:
-                self.active = None
-            else:
-                self.active = self.hover
+        if self.hover and self.active != self.hover:
+            self.active = self.hover
+        else:
+            self.active = None
 
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
@@ -205,7 +207,19 @@ class RenderManager:
         # print(mouse_x, mouse_y)
         return mouse_x, mouse_y
 
-    def render(self, screen: pygame.Surface, deltatime):
+    def circle_arc(self, screen, color, position, radius, width, arcs, arc_length, angle):
+        gap_length = ((2*pi) - arc_length*arcs) / arcs
+        for arc in range(arcs):
+            pygame.draw.arc(
+                screen,
+                color,
+                pygame.Rect(position[0]-radius, position[1]-radius, radius*2, radius*2),
+                arc*(gap_length+arc_length)-angle,
+                arc*(gap_length+arc_length)-angle+arc_length,
+                width
+            )
+
+    def render(self, screen: pygame.Surface, current_time):
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
@@ -238,7 +252,12 @@ class RenderManager:
             pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.25, int(size*0.125))
 
         if render_info["active"]:
-            print("ACTIVE")
+            planet_info = render_info["active"]
+            position = planet_info["position"]
+            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
+            position = (position[0]*scale_amount, position[1]*scale_amount)
+            size = planet_info["size"] * scale_amount
+            self.circle_arc(screen, "#AAAAAA", position, size*1.5, int(size*0.15), 4, 1, current_time*0.00125)
 
 if __name__ == "__main__":
     game = MainGame()
