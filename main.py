@@ -23,8 +23,8 @@ class MainGame:
                     self.running = False
                 self.handle_input(event)
             self.handle_hold_inputs()
-            self.render_tick()
-            self.renderManager.render(self.map, self.screen)
+            self.tick()
+            self.renderManager.render(self.screen, self.delta_time)
             pygame.display.flip()
 
             self.delta_time = self.clock.tick(60)
@@ -57,8 +57,8 @@ class MainGame:
             map_mouse_pos = self.renderManager.convert_mouse_pos(self.mouse_pos)
             self.map.check_hover(map_mouse_pos)
 
-    def render_tick(self):
-        self.renderManager.render_tick(self.delta_time)
+    def tick(self):
+        pass
 
 
 class Planet:
@@ -195,15 +195,12 @@ class RenderManager:
         # print(mouse_x, mouse_y)
         return mouse_x, mouse_y
 
-    def render_tick(self, deltatime):
-        pass
-
-    def render(self, map: Map, screen: pygame.Surface):
+    def render(self, screen: pygame.Surface, deltatime):
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
-        render_info = map.get_render_info()
-        scale_amount = screen.height/map.map_rect.height * self.zoom_level
+        render_info = self.map.get_render_info()
+        scale_amount = screen.height/self.map.map_rect.height * self.zoom_level
 
         for route_info in render_info["routes"]:
             position1 = route_info["position1"]
