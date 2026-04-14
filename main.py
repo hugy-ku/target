@@ -17,24 +17,20 @@ class MainGame:
 
     def mainloop(self):
         while self.running:
+            self.handle_hold_inputs()
+
             for event in pygame.event.get():
                 print(event) # debug
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.handle_input(event)
-            self.handle_hold_inputs()
+
             self.tick()
             self.renderManager.render(self.screen, self.delta_time)
-            pygame.display.flip()
 
+            pygame.display.flip()
             self.delta_time = self.clock.tick(60)
 
-    def handle_input(self, event: pygame.event.Event):
-
-        if event.type == pygame.MOUSEWHEEL:
-            self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
-        if event.type == pygame.MOUSEMOTION:
-            self.mouse_pos = event.pos
 
     def handle_hold_inputs(self):
         pressed = pygame.key.get_pressed()
@@ -56,6 +52,15 @@ class MainGame:
         if self.mouse_pos:
             map_mouse_pos = self.renderManager.convert_mouse_pos(self.mouse_pos)
             self.map.check_hover(map_mouse_pos)
+
+    def handle_input(self, event: pygame.event.Event):
+
+        if event.type == pygame.MOUSEWHEEL:
+            self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
+        if event.type == pygame.MOUSEMOTION:
+            self.mouse_pos = event.pos
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.map.check_active()
 
     def tick(self):
         pass
@@ -81,12 +86,6 @@ class Planet:
             "size": self.size,
             "color": self.color
         }
-        # scale_level = screen.height/map_size[0]
-        # new_zoom_level = zoom_level * scale_level
-        # new_position = self.get_zoomed_position(new_zoom_level, screen.size)
-        # new_size = self.size * new_zoom_level
-        # pygame.draw.circle(screen, self.color, new_position, new_size)
-
 
 class Route:
     def __init__(self, planet1: Planet, planet2: Planet, size):
@@ -123,6 +122,13 @@ class Map:
                 return
         self.hover = None
 
+    def check_active(self):
+        if self.hover:
+            if self.active == self.hover:
+                self.active = None
+            else:
+                self.active = self.hover
+
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         planet1 = Planet((0, 0), 100)
@@ -157,12 +163,16 @@ class Map:
             hover_info = self.hover.get_render_info()
         else:
             hover_info = None
+        if self.active:
+            active_info = self.active.get_render_info()
+        else:
+            active_info = None
 
         return {
             "planets": planets,
             "routes": routes,
             "hover": hover_info,
-            "active": None
+            "active": active_info
         }
 
 
@@ -226,6 +236,9 @@ class RenderManager:
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.25, int(size*0.125))
+
+        if render_info["active"]:
+            print("ACTIVE")
 
 if __name__ == "__main__":
     game = MainGame()
