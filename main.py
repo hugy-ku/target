@@ -11,19 +11,19 @@ class MainGame:
         self.map = Map()
         self.map.generate_map((2000, 2000))
         self.renderManager = RenderManager(self.map)
+        self.mouse_pos = None
 
         self.mainloop()
 
     def mainloop(self):
         while self.running:
-            self.mouse_pos = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 print(event) # debug
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.handle_input(event)
             self.handle_hold_inputs()
-            self.tick()
+            self.render_tick()
             self.renderManager.render(self.map, self.screen)
             pygame.display.flip()
 
@@ -33,25 +33,32 @@ class MainGame:
 
         if event.type == pygame.MOUSEWHEEL:
             self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
+        if event.type == pygame.MOUSEMOTION:
+            self.mouse_pos = event.pos
 
     def handle_hold_inputs(self):
         pressed = pygame.key.get_pressed()
-        mouse_pos = pygame.mouse.get_pos()
-        map_mouse_pos = self.renderManager.convert_mouse_pos(mouse_pos)
 
+        speed_mod = 1
+        if pressed[pygame.K_LSHIFT]:
+            speed_mod *= 4
+        if pressed[pygame.K_LCTRL]:
+            speed_mod *= 0.25
         if pressed[pygame.K_w]:
-            self.renderManager.change_position((0, -self.delta_time/2))
+            self.renderManager.change_position((0, -self.delta_time/2*speed_mod))
         if pressed[pygame.K_a]:
-            self.renderManager.change_position((-self.delta_time/2, 0))
+            self.renderManager.change_position((-self.delta_time/2*speed_mod, 0))
         if pressed[pygame.K_s]:
-            self.renderManager.change_position((0, self.delta_time/2))
+            self.renderManager.change_position((0, self.delta_time/2*speed_mod))
         if pressed[pygame.K_d]:
-            self.renderManager.change_position((self.delta_time/2, 0))
+            self.renderManager.change_position((self.delta_time/2*speed_mod, 0))
 
-        self.map.check_hover(map_mouse_pos)
+        if self.mouse_pos:
+            map_mouse_pos = self.renderManager.convert_mouse_pos(self.mouse_pos)
+            self.map.check_hover(map_mouse_pos)
 
-    def tick(self):
-        self.renderManager.convert_mouse_pos(pygame.mouse.get_pos())
+    def render_tick(self):
+        self.renderManager.render_tick(self.delta_time)
 
 
 class Planet:
@@ -119,7 +126,7 @@ class Map:
     def generate_map(self, map_size):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         planet1 = Planet((0, 0), 100)
-        planet2 = Planet((1800, 1800), 100)
+        planet2 = Planet((2000, 2000), 100)
         planet3 = Planet((1000, 1500), 100)
         self.planets.append(planet1)
         self.planets.append(planet2)
@@ -188,6 +195,9 @@ class RenderManager:
         # print(mouse_x, mouse_y)
         return mouse_x, mouse_y
 
+    def render_tick(self, deltatime):
+        pass
+
     def render(self, map: Map, screen: pygame.Surface):
         screen.fill("#777777")
         self.viewport.width = screen.width
@@ -218,7 +228,7 @@ class RenderManager:
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
-            pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.4, int(size*0.15))
+            pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.25, int(size*0.125))
 
 if __name__ == "__main__":
     game = MainGame()
