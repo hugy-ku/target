@@ -77,7 +77,5 @@ class MainGame:
         self.map.tick()
 
 
-
-
 if __name__ == "__main__":
     game = MainGame()

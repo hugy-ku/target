@@ -14,7 +14,7 @@ class Map:
         planet = Planet(position, size)
         self.planets.append(planet)
 
-    def add_route(self, planet1: Planet, planet2: Planet, size=30):
+    def add_route(self, planet1: Planet, planet2: Planet, size=100):
         route = Route(planet1, planet2, size)
         planet1.add_route(route)
         planet2.add_route(route)

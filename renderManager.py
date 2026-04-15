@@ -57,8 +57,8 @@ class RenderManager:
             position2 = route_info["position2"]
             position2 = (position2[0]-self.viewport.left, position2[1]-self.viewport.top)
             position2 = (position2[0]*scale_amount, position2[1]*scale_amount)
-            size = route_info["size"] * scale_amount
-            pygame.draw.line(screen, route_info["color"], position1, position2, int(size))
+            route_size = route_info["size"]//3 * scale_amount
+            pygame.draw.line(screen, route_info["color"], position1, position2, int(route_size))
 
             for drones in route_info["drones"]:
                 drones_rendered = 0
@@ -85,9 +85,10 @@ class RenderManager:
             screen.blit(font.render(str(len(planet_info["drones"])), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
 
             drones_rendered = 0
+            max_limit = 200
             for drone in reversed(planet_info["drones"]):
                 # the only thing thats going to prevent the computer from exploding
-                if drones_rendered >= 200:
+                if drones_rendered >= max_limit:
                     break
                 drone_info = drone.get_render_info()
                 position = drone_info["position"]

@@ -22,36 +22,43 @@ class Route:
             self.drones.append({
                 "ticks": 0,
                 "amount": amount,
-                "reverse": False
+                "reverse": False,
+                "position": self.get_pos_from_tick(0)
             })
         else:
             self.drones.append({
                 "ticks": self.ticks_distance,
                 "amount": amount,
-                "reverse": True
+                "reverse": True,
+                "position": self.get_pos_from_tick(self.ticks_distance)
             })
 
     def tick(self):
         for drones in self.drones:
+
+
             if not drones["reverse"]:
                 drones["ticks"] += 1
                 if drones["ticks"] >= self.ticks_distance:
                     self.drones.remove(drones)
                     self.planet2.get_drones(drones["amount"])
-
+                drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
                 drones["ticks"] -= 1
                 if drones["ticks"] <= 0:
                     self.drones.remove(drones)
                     self.planet1.get_drones(drones["amount"])
+                drones["position"] = self.get_pos_from_tick(drones["ticks"])
 
             for drone in drones["amount"]:
                 drone.set_target((
-                    self.planet1.position[0]+self.distance_per_tick[0]*drones["ticks"] + 100*((drone.offset)*math.cos(drone.angle_offset)),
-                    self.planet1.position[1]+self.distance_per_tick[1]*drones["ticks"] + 100*((drone.offset)*math.sin(drone.angle_offset))
+                    drones["position"][0] + 100*((drone.offset)*math.cos(drone.angle_offset)),
+                    drones["position"][1] + 100*((drone.offset)*math.sin(drone.angle_offset))
                 ))
                 drone.tick()
 
+    def get_pos_from_tick(self, tick):
+        return (self.planet1.position[0]+self.distance_per_tick[0]*tick, self.planet1.position[1]+self.distance_per_tick[1]*tick)
 
     def get_render_info(self):
         return {
