@@ -15,7 +15,10 @@ class Route:
         y2 = max(self.planet1.position[1]+self.planet1.size, self.planet2.position[1]+self.planet2.size)
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
         self.ticks_distance = math.dist((x1, y1), (x2, y2))/5
-        self.distance_per_tick = ((planet2.position[0]-planet1.position[0])/self.ticks_distance, (planet2.position[1]-planet1.position[1])/self.ticks_distance)
+        self.distance_per_tick = (
+            (planet2.position[0]-planet1.position[0])/self.ticks_distance,
+            (planet2.position[1]-planet1.position[1])/self.ticks_distance
+        )
 
     def get_drones(self, amount, origin_planet):
         if origin_planet == self.planet1:

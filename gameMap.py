@@ -55,7 +55,7 @@ class Map:
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         planet1 = Planet((0, 0), 100)
         planet2 = Planet((2000, 2000), 100, drones=1000)
-        planet3 = Planet((1000, 1500), 100)
+        planet3 = Planet((1000, 1500), 100, color="#DD8888")
         self.planets.append(planet1)
         self.planets.append(planet2)
         self.planets.append(planet3)

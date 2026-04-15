@@ -4,10 +4,10 @@ import math
 import random
 
 class Planet:
-    def __init__(self, position: tuple[int, int], size: int, ticks_per_drone=10, ticks_per_orbit=1000, orbit_distance=2, drones=0):
+    def __init__(self, position: tuple[int, int], size: int, color="#88DD88", ticks_per_drone=10, ticks_per_orbit=1000, orbit_distance=2, drones=0):
         self.position = position
         self.size = size
-        self.color = "#88DD88"
+        self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list = []
         self.drones: list[Drone] = []
@@ -34,7 +34,7 @@ class Planet:
             drone.tick()
 
     def send_drones(self, amount, route):
-        new_drones = [self.drones.pop() for _ in range(amount)]
+        new_drones = [self.drones.pop() for _ in range(amount)][::-1] # reversed to make sure that visible drones are both ordered last AND popped first
         route.get_drones(new_drones, self)
 
     def get_drones(self, drones):
