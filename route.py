@@ -14,7 +14,8 @@ class Route:
         x2 = max(self.planet1.position[0]+self.planet1.size, self.planet2.position[0]+self.planet2.size)
         y2 = max(self.planet1.position[1]+self.planet1.size, self.planet2.position[1]+self.planet2.size)
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
-        self.ticks_distance = math.dist((x1, y1), (x2, y2))/3
+        self.ticks_distance = math.dist((x1, y1), (x2, y2))/5
+        self.distance_per_tick = ((planet2.position[0]-planet1.position[0])/self.ticks_distance, (planet2.position[1]-planet1.position[1])/self.ticks_distance)
 
     def get_drones(self, amount, origin_planet):
         if origin_planet == self.planet1:
@@ -31,22 +32,32 @@ class Route:
             })
 
     def tick(self):
-        for drone in self.drones:
-            if not drone["reverse"]:
-                drone["ticks"] += 1
-                if drone["ticks"] >= self.ticks_distance:
-                    self.drones.remove(drone)
-                    self.planet2.get_drones(drone["amount"])
+        for drones in self.drones:
+            if not drones["reverse"]:
+                drones["ticks"] += 1
+                if drones["ticks"] >= self.ticks_distance:
+                    self.drones.remove(drones)
+                    self.planet2.get_drones(drones["amount"])
+
             else:
-                drone["ticks"] -= 1
-                if drone["ticks"] <= 0:
-                    self.drones.remove(drone)
-                    self.planet1.get_drones(drone["amount"])
+                drones["ticks"] -= 1
+                if drones["ticks"] <= 0:
+                    self.drones.remove(drones)
+                    self.planet1.get_drones(drones["amount"])
+
+            for drone in drones["amount"]:
+                drone.set_target((
+                    self.planet1.position[0]+self.distance_per_tick[0]*drones["ticks"] + 100*((drone.offset)*math.cos(drone.angle_offset)),
+                    self.planet1.position[1]+self.distance_per_tick[1]*drones["ticks"] + 100*((drone.offset)*math.sin(drone.angle_offset))
+                ))
+                drone.tick()
+
 
     def get_render_info(self):
         return {
             "position1": self.planet1.position,
             "position2": self.planet2.position,
             "size": self.size,
-            "color": "#BBBBBB"
+            "color": "#BBBBBB",
+            "drones": self.drones
         }

@@ -60,6 +60,20 @@ class RenderManager:
             size = route_info["size"] * scale_amount
             pygame.draw.line(screen, route_info["color"], position1, position2, int(size))
 
+            for drones in route_info["drones"]:
+                drones_rendered = 0
+                for drone in reversed(drones["amount"]):
+                    # the only thing thats going to prevent the computer from exploding
+                    if drones_rendered >= 200:
+                        break
+                    drone_info = drone.get_render_info()
+                    position = drone_info["position"]
+                    position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
+                    position = (position[0]*scale_amount, position[1]*scale_amount)
+                    size = drone_info["size"] * scale_amount
+                    pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
+                    drones_rendered += 1
+
         for planet_info in render_info["planets"]:
             position = planet_info["position"]
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
@@ -70,13 +84,18 @@ class RenderManager:
             font_size = font.size(str(len(planet_info["drones"])))
             screen.blit(font.render(str(len(planet_info["drones"])), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
 
-            for drone in planet_info["drones"]:
+            drones_rendered = 0
+            for drone in reversed(planet_info["drones"]):
+                # the only thing thats going to prevent the computer from exploding
+                if drones_rendered >= 200:
+                    break
                 drone_info = drone.get_render_info()
                 position = drone_info["position"]
                 position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
                 position = (position[0]*scale_amount, position[1]*scale_amount)
                 size = drone_info["size"] * scale_amount
                 pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
+                drones_rendered += 1
 
         if render_info["hover"]:
             planet_info = render_info["hover"]
