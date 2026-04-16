@@ -44,6 +44,9 @@ class RenderManager:
             )
 
     def render(self, screen: pygame.Surface, current_time):
+        # the reason why the code in this function is awful is because i
+        # intentionally interact with it as little as possible
+        # im NOT going through viewport hell again
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
