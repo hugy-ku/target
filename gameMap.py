@@ -48,7 +48,7 @@ class Map:
             self.active = self.hover
             return
 
-        self.active.send_drones(len(self.active.drones), route)
+        self.active.send_drones(self.active.number_of_drones, route)
         self.active = None
 
     def generate_map(self, map_size):

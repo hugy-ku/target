@@ -1,6 +1,7 @@
 import pygame
 import math
 from planets import Planet
+from drone import Drone
 
 class Route:
     def __init__(self, planet1: Planet, planet2: Planet, size):
@@ -20,11 +21,13 @@ class Route:
             (planet2.position[1]-planet1.position[1])/self.ticks_distance
         )
 
-    def get_drones(self, amount, origin_planet):
+    def get_drones(self, amount, visible_drones: list[Drone], origin_planet: Planet):
         if origin_planet == self.planet1:
             self.drones.append({
                 "ticks": 0,
                 "amount": amount,
+                "visible_drones": visible_drones,
+                "color": origin_planet.color,
                 "reverse": False,
                 "position": self.get_pos_from_tick(0)
             })
@@ -32,6 +35,8 @@ class Route:
             self.drones.append({
                 "ticks": self.ticks_distance,
                 "amount": amount,
+                "visible_drones": visible_drones,
+                "color": origin_planet.color,
                 "reverse": True,
                 "position": self.get_pos_from_tick(self.ticks_distance)
             })
@@ -39,21 +44,20 @@ class Route:
     def tick(self):
         for drones in self.drones:
 
-
             if not drones["reverse"]:
                 drones["ticks"] += 1
                 if drones["ticks"] >= self.ticks_distance:
                     self.drones.remove(drones)
-                    self.planet2.get_drones(drones["amount"])
+                    self.planet2.get_drones(drones["amount"], drones["visible_drones"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
                 drones["ticks"] -= 1
                 if drones["ticks"] <= 0:
                     self.drones.remove(drones)
-                    self.planet1.get_drones(drones["amount"])
+                    self.planet1.get_drones(drones["amount"], drones["visible_drones"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
 
-            for drone in drones["amount"]:
+            for drone in drones["visible_drones"]:
                 drone.set_target((
                     drones["position"][0] + 100*((drone.offset)*math.cos(drone.angle_offset)),
                     drones["position"][1] + 100*((drone.offset)*math.sin(drone.angle_offset))
