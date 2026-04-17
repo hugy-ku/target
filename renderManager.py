@@ -73,6 +73,15 @@ class RenderManager:
                     pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
         for planet_info in render_info["planets"]:
+
+            for drone in planet_info["drones"]:
+                drone_info = drone.get_render_info()
+                position = drone_info["position"]
+                position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
+                position = (position[0]*scale_amount, position[1]*scale_amount)
+                size = drone_info["size"] * scale_amount
+                pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
+
             position = planet_info["position"]
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
@@ -82,13 +91,6 @@ class RenderManager:
             font_size = font.size(str(planet_info["amount"]))
             screen.blit(font.render(str(planet_info["amount"]), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
 
-            for drone in planet_info["drones"]:
-                drone_info = drone.get_render_info()
-                position = drone_info["position"]
-                position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-                position = (position[0]*scale_amount, position[1]*scale_amount)
-                size = drone_info["size"] * scale_amount
-                pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
         ##### planet selection rendering
 

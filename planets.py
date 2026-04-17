@@ -19,25 +19,32 @@ class Planet:
         self.ticks_per_orbit = ticks_per_orbit
         self.angle_per_tick = (2*math.pi)/ticks_per_orbit
         self.orbit_distance = self.size*orbit_distance
+        self.drones_defending = 0 # purely visual dw about it too much
 
         self.add_drones(drones)
 
     def add_drones(self, amount=1):
         self.number_of_drones += amount
         for _ in range(amount):
-            self.visible_drones.insert(0, Drone(self.position, self.color, random.random(), random.randint(0, self.ticks_per_orbit)))
+            self.visible_drones.insert(0, Drone(self.position, self.color, random.random(), random.randint(0, self.ticks_per_orbit), self.size//20))
         self.visible_drones = self.visible_drones[:self.max_visible_drones]
 
     def add_route(self, route):
         self.routes.append(route)
 
+    def set_defending_drones(self, amount):
+        self.drones_defending = amount
+
     def tick(self):
         self.tick_count += 1
         if self.tick_count % self.ticks_per_drone == 0:
             self.add_drones()
-        for drone in self.visible_drones:
+        for i, drone in enumerate(self.visible_drones):
             angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
-            drone.set_target((self.position[0]+(self.orbit_distance*(drone.offset/1.5+1))*math.cos(angle), self.position[1]+(self.orbit_distance*(drone.offset/1.5+1))*math.sin(angle)))
+            if i < self.drones_defending:
+                drone.set_target(self.position)
+            else:
+                drone.set_target((self.position[0]+(self.orbit_distance*(drone.offset/1.5+1))*math.cos(angle), self.position[1]+(self.orbit_distance*(drone.offset/1.5+1))*math.sin(angle)))
             drone.tick()
 
     def send_drones(self, amount, route):
@@ -45,12 +52,22 @@ class Planet:
         new_drones = [self.visible_drones.pop() for _ in range(min(self.max_visible_drones, amount))]
         route.get_drones(amount, new_drones, self)
 
-    def get_drones(self, amount, visible_drones):
-        self.number_of_drones += amount
-        for drone in visible_drones:
-            if len(self.visible_drones) < self.max_visible_drones:
-                drone.position = self.position
-                self.visible_drones.insert(0, drone)
+    def get_drones(self, amount, visible_drones, drone_color):
+        if drone_color == self.color:
+            self.number_of_drones += amount
+            for drone in visible_drones:
+                if len(self.visible_drones) < self.max_visible_drones:
+                    drone.position = self.position
+                    self.visible_drones.insert(0, drone)
+        else:
+            self.number_of_drones -= amount
+            if self.number_of_drones <= 0:
+                self.color = drone_color
+                drones_left = self.number_of_drones * -1
+                self.number_of_drones = 0
+                self.visible_drones = []
+                self.add_drones(drones_left)
+        self.drones_defending = 0
 
     def get_render_info(self):
         return {
