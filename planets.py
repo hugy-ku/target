@@ -17,6 +17,7 @@ class Planet:
 
         self.ticks_per_drone = ticks_per_drone
         self.ticks_per_orbit = ticks_per_orbit
+        self.ticks_since_last_drone = 0
         self.angle_per_tick = (2*math.pi)/ticks_per_orbit
         self.orbit_distance = self.size*orbit_distance
         self.drones_defending = 0 # purely visual dw about it too much
@@ -36,11 +37,14 @@ class Planet:
     def set_defending_drones(self, amount):
         self.drones_defending = amount
 
-    def tick(self):
-        self.tick_count += 1
-        if self.tick_count % self.ticks_per_drone == 0:
-            self.number_of_drones += 1
-            self.add_visible_drones()
+    def tick(self, amount):
+        self.tick_count += amount
+        self.ticks_since_last_drone += amount
+
+        self.number_of_drones += self.ticks_since_last_drone // self.ticks_per_drone
+        self.add_visible_drones(self.ticks_since_last_drone // self.ticks_per_drone)
+        self.ticks_since_last_drone %= self.ticks_per_drone
+
         for i, drone in enumerate(self.visible_drones):
             angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
             if i >= len(self.visible_drones)-self.drones_defending:

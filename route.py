@@ -41,11 +41,11 @@ class Route:
                 "position": self.get_pos_from_tick(self.ticks_distance)
             })
 
-    def tick(self):
+    def tick(self, amount):
         for drones in self.drones:
 
             if not drones["reverse"]:
-                drones["ticks"] += 1
+                drones["ticks"] += amount
                 if drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance-self.planet2.size:
                     self.planet2.set_defending_drones(len(drones["visible_drones"]))
                 if drones["ticks"] >= self.ticks_distance:
@@ -53,7 +53,7 @@ class Route:
                     self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
-                drones["ticks"] -= 1
+                drones["ticks"] -= amount
                 if drones["color"] != self.planet1.color and drones["ticks"] <= self.planet1.size:
                     self.planet1.set_defending_drones(len(drones["visible_drones"]))
                 if drones["ticks"] <= 0:

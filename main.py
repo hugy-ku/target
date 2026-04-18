@@ -18,6 +18,8 @@ class MainGame:
         self.current_time = 0
         self.time_since_last_tick = 0
 
+        self.milliseconds_per_tick = 20
+
         self.mainloop()
 
     def mainloop(self):
@@ -33,7 +35,8 @@ class MainGame:
                     self.running = False
                 self.handle_input(event)
 
-            self.tick()
+            self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
+            self.time_since_last_tick %= self.milliseconds_per_tick
 
             self.renderManager.render(self.screen, self.current_time)
 
@@ -73,8 +76,8 @@ class MainGame:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.map.check_active()
 
-    def tick(self):
-        self.map.tick()
+    def tick(self, amount=1):
+        self.map.tick(amount)
 
 
 if __name__ == "__main__":

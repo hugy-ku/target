@@ -63,11 +63,11 @@ class Map:
         self.add_route(planet1, planet3)
         self.add_route(planet2, planet3)
 
-    def tick(self):
+    def tick(self, amount):
         for planet in self.planets:
-            planet.tick()
+            planet.tick(amount)
         for route in self.routes:
-            route.tick()
+            route.tick(amount)
 
     def get_render_info(self):
         planets = []
