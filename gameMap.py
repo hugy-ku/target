@@ -69,6 +69,12 @@ class Map:
         for route in self.routes:
             route.tick(amount)
 
+    def render_tick(self, timescale):
+        for planet in self.planets:
+            planet.render_tick(timescale)
+        for route in self.routes:
+            route.render_tick(timescale)
+
     def get_render_info(self):
         planets = []
         routes = []

@@ -1,7 +1,6 @@
 drone stuff idk
 
 todo:
-separate game ticks and render ticks
 add timescaling
 add planet upgrades
 add UI for planet upgrades

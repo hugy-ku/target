@@ -13,8 +13,8 @@ class Drone:
     def set_target(self, new_position):
         self.target_position = new_position
 
-    def tick(self):
-        self.position = (self.position[0]+0.1*(self.target_position[0]-self.position[0]), self.position[1]+0.1*(self.target_position[1]-self.position[1]))
+    def tick(self, delta_time):
+        self.position = (self.position[0]+(self.target_position[0]-self.position[0])*delta_time/175, self.position[1]+(self.target_position[1]-self.position[1])*delta_time/175)
 
     def get_render_info(self):
         return {

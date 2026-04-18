@@ -38,6 +38,7 @@ class MainGame:
             self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
             self.time_since_last_tick %= self.milliseconds_per_tick
 
+            self.map.render_tick(self.delta_time)
             self.renderManager.render(self.screen, self.current_time)
 
             pygame.display.flip()

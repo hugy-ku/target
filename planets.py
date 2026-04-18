@@ -51,7 +51,10 @@ class Planet:
                 drone.set_target(self.position)
             else:
                 drone.set_target((self.position[0]+(self.orbit_distance*(drone.offset/1.5+1))*math.cos(angle), self.position[1]+(self.orbit_distance*(drone.offset/1.5+1))*math.sin(angle)))
-            drone.tick()
+
+    def render_tick(self, timescale):
+        for drone in self.visible_drones:
+            drone.tick(timescale)
 
     def send_drones(self, amount, route):
         self.number_of_drones -= amount

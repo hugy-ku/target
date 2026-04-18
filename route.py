@@ -66,7 +66,11 @@ class Route:
                     drones["position"][0] + 100*((drone.offset)*math.cos(drone.angle_offset)),
                     drones["position"][1] + 100*((drone.offset)*math.sin(drone.angle_offset))
                 ))
-                drone.tick()
+
+    def render_tick(self, timescale):
+        for drones in self.drones:
+            for drone in drones["visible_drones"]:
+                drone.tick(timescale)
 
     def get_pos_from_tick(self, tick):
         return (self.planet1.position[0]+self.distance_per_tick[0]*tick, self.planet1.position[1]+self.distance_per_tick[1]*tick)
