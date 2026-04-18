@@ -10,6 +10,9 @@ class MainGame:
         self.clock = pygame.Clock()
         self.running = True
         self.delta_time = 0
+        self.framerate = pygame.display.get_current_refresh_rate()
+        if self.framerate == 0:
+            self.framerate = 60
         self.map = Map()
         self.map.generate_map((2000, 2000))
         self.renderManager = RenderManager(self.map)
@@ -42,7 +45,7 @@ class MainGame:
             self.renderManager.render(self.screen, self.current_time)
 
             pygame.display.flip()
-            self.delta_time = self.clock.tick(60)
+            self.delta_time = self.clock.tick()
 
 
     def handle_hold_inputs(self):
