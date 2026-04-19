@@ -76,12 +76,12 @@ class Map:
         self.planets[0].color = "#DD8888"
         self.planets[0].visible_drones = []
         self.planets[0].number_of_drones = 0
-        self.planets[0].ticks_per_drone = 10
+        self.planets[0].ticks_per_drone = 30
 
         self.planets[-1].color = "#88DD88"
         self.planets[-1].visible_drones = []
         self.planets[-1].number_of_drones = 0
-        self.planets[-1].ticks_per_drone = 10
+        self.planets[-1].ticks_per_drone = 30
 
 
     def tick(self, amount):

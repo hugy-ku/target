@@ -4,7 +4,7 @@ import math
 import random
 
 class Planet:
-    def __init__(self, position: tuple[int, int], size=100, color="#555555", ticks_per_drone=10, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
+    def __init__(self, position: tuple[int, int], size=100, color="#555555", ticks_per_drone=30, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
         self.position = position
         self.size = size
         self.color = color
@@ -74,7 +74,7 @@ class Planet:
         else:
             if self.number_of_drones <= amount*self.vulnerability:
                 if not self.ticks_per_drone:
-                    self.ticks_per_drone = 10
+                    self.ticks_per_drone = 30
                 self.color = drone_color
                 self.number_of_drones = amount - (self.number_of_drones//self.vulnerability)
                 self.visible_drones = []
