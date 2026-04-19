@@ -17,6 +17,6 @@ class GameUi:
             "color": "#000000",
             "size": 1,
             "position": "bottomright",
-            "padding": (10, 10)
+            "offset": (-10, -10)
         })
         return info

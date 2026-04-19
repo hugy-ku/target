@@ -124,7 +124,7 @@ class RenderManager:
 
                 if ui_info["position"] == "bottomright":
                     position = list(screen.size)
-                    position[0] -= ui_info["padding"][0] + font_size[0]
-                    position[1] -= ui_info["padding"][1] + font_size[1]
+                    position[0] += ui_info["offset"][0] - font_size[0]
+                    position[1] += ui_info["offset"][1] - font_size[1]
 
                 screen.blit(font.render(ui_info["text"], False, ui_info["color"]), position)
