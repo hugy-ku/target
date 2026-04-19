@@ -122,9 +122,20 @@ class RenderManager:
                 font = pygame.font.Font(None, int(size/self.zoom_level))
                 font_size = font.size(ui_info["text"])
 
+                if ui_info["position"] == "topleft":
+                    position = [0, 0]
+                if ui_info["position"] == "bottomleft":
+                    position = [0, screen.height]
+                    position[1] -= font_size[1]
+                if ui_info["position"] == "topright":
+                    position = [screen.width, 0]
+                    position[0] -= font_size[0]
                 if ui_info["position"] == "bottomright":
-                    position = list(screen.size)
-                    position[0] += ui_info["offset"][0] - font_size[0]
-                    position[1] += ui_info["offset"][1] - font_size[1]
+                    position = [screen.width, screen.height]
+                    position[0] -= font_size[0]
+                    position[1] -= font_size[1]
+
+                position[0] += ui_info["offset"][0]
+                position[1] += ui_info["offset"][1]
 
                 screen.blit(font.render(ui_info["text"], False, ui_info["color"]), position)

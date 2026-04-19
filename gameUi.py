@@ -16,7 +16,7 @@ class GameUi:
             "text": f"{">"*self.__timescale if not self.__paused else 'paused'}",
             "color": "#000000",
             "size": 1,
-            "position": "bottomright",
-            "offset": (-10, -10)
+            "position": "topleft",
+            "offset": (10, 10)
         })
         return info
