@@ -16,10 +16,11 @@ class MainGame:
             self.framerate = 60
 
         self.timescale = 1
+        self.paused = False
 
         self.map = Map()
         self.map.random_generate((2000, 2000))
-        self.ui = GameUi(self.timescale)
+        self.ui = GameUi(self.timescale, self.paused)
         self.renderManager = RenderManager(self.map, self.ui)
 
 
@@ -33,9 +34,6 @@ class MainGame:
 
     def mainloop(self):
         while self.running:
-            # convert to int in case timescale < 1 and it divides
-            self.current_time += int(self.delta_time * self.timescale)
-            self.time_since_last_tick += int(self.delta_time * self.timescale)
 
             self.handle_hold_inputs()
 
@@ -45,11 +43,16 @@ class MainGame:
                     self.running = False
                 self.handle_input(event)
 
-            self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
-            self.time_since_last_tick %= self.milliseconds_per_tick
+            if not self.paused:
+                # convert to int in case timescale < 1 and it divides
+                self.current_time += int(self.delta_time * self.timescale)
+                self.time_since_last_tick += int(self.delta_time * self.timescale)
 
-            self.map.render_tick(self.delta_time)
-            self.renderManager.render(self.screen, self.current_time)
+                self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
+                self.time_since_last_tick %= self.milliseconds_per_tick
+                self.map.render_tick(self.delta_time)
+
+            self.renderManager.render(self.screen, self.delta_time)
 
             pygame.display.flip()
             self.delta_time = self.clock.tick()
@@ -88,18 +91,17 @@ class MainGame:
             self.map.check_active()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
-                self.timescale = 1
-                self.ui.set_timescale(1)
-            if event.key == pygame.K_2:
-                self.timescale = 2
-                self.ui.set_timescale(2)
-            if event.key == pygame.K_3:
-                self.timescale = 4
-                self.ui.set_timescale(3)
-            if event.key == pygame.K_4:
-                self.timescale = 8
-                self.ui.set_timescale(4)
+            timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
+            if event.key in timescales:
+                timescale = int(event.unicode)
+                self.timescale = 2**timescale
+                self.paused = False
+                self.ui.set_paused(self.paused)
+                self.ui.set_timescale(timescale)
+
+            if event.key == pygame.K_SPACE:
+                self.paused = not self.paused
+                self.ui.set_paused(self.paused)
 
     def tick(self, amount=1):
         self.map.tick(amount)

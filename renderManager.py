@@ -9,6 +9,7 @@ class RenderManager:
         self.ui = ui
         self.zoom_level = 1
         self.viewport = map.map_rect.copy()
+        self.current_time = 0
 
     def change_position(self, pos_amount):
         self.viewport.move_ip(pos_amount)
@@ -45,10 +46,11 @@ class RenderManager:
                 width
             )
 
-    def render(self, screen: pygame.Surface, current_time):
+    def render(self, screen: pygame.Surface, delta_time):
         # the reason why the code in this function is awful is because i
         # intentionally interact with it as little as possible
         # im NOT going through viewport hell again
+        self.current_time += delta_time
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
@@ -110,7 +112,7 @@ class RenderManager:
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
-            self.circle_arc(screen, "#AAAAAA", position, size*1.5, int(size*0.15), 4, 1, current_time*0.00125)
+            self.circle_arc(screen, "#AAAAAA", position, size*1.5, int(size*0.15), 4, 1, self.current_time*0.00125)
 
         # UI rendering
 

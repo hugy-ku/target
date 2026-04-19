@@ -65,7 +65,7 @@ class Map:
                 continue
             planet = self.add_planet(position)
             for i, other_planet in enumerate(distance_sorted):
-                if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*1.5:
+                if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*1.75:
                     self.add_route(planet, other_planet)
 
 
