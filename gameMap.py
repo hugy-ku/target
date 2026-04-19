@@ -3,6 +3,7 @@ from planets import Planet
 from route import Route
 import random
 import math
+import multiprocessing
 
 class Map:
     def __init__(self):
@@ -67,6 +68,9 @@ class Map:
             for i, other_planet in enumerate(distance_sorted):
                 if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*1.75:
                     self.add_route(planet, other_planet)
+
+        # test
+        self.planets[0].color = "#DD8888"
 
 
     def tick(self, amount):

@@ -11,8 +11,6 @@ class Planet:
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list = []
         self.max_visible_drones = max_visible_drones
-        self.visible_drones: list[Drone] = []
-        self.number_of_drones = drones
         self.tick_count = 0
 
         self.ticks_per_drone = ticks_per_drone
@@ -21,6 +19,10 @@ class Planet:
         self.angle_per_tick = (2*math.pi)/ticks_per_orbit
         self.orbit_distance = self.size*orbit_distance
         self.drones_defending = 0 # purely visual dw about it too much
+
+        self.visible_drones: list[Drone] = []
+        self.number_of_drones = drones
+        self.vulnerability = 2
 
         self.add_visible_drones(drones)
 
@@ -35,7 +37,7 @@ class Planet:
         self.routes.append(route)
 
     def set_defending_drones(self, amount):
-        self.drones_defending = amount
+        self.drones_defending = amount * self.vulnerability
 
     def tick(self, amount):
         self.tick_count += amount
@@ -69,13 +71,13 @@ class Planet:
                     drone.position = self.position
                     self.visible_drones.insert(0, drone)
         else:
-            self.number_of_drones -= amount
-            if self.number_of_drones <= 0:
+            if self.number_of_drones <= amount*self.vulnerability:
                 self.color = drone_color
-                self.number_of_drones *= -1
+                self.number_of_drones = amount - (self.number_of_drones//self.vulnerability)
                 self.visible_drones = []
                 self.add_visible_drones(self.number_of_drones)
             else:
+                self.number_of_drones -= amount*self.vulnerability
                 self.visible_drones = self.visible_drones[:-self.drones_defending]
                 self.add_visible_drones(min(self.number_of_drones-len(self.visible_drones), self.max_visible_drones-len(self.visible_drones)))
         self.drones_defending = 0
