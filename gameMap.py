@@ -26,7 +26,7 @@ class Map:
 
     def get_route(self, planet1: Planet, planet2: Planet):
         for route in planet1.routes:
-            if route.planet1 == planet2 or route.planet2 == planet2:
+            if route.planet1 == planet1 and route.planet2 == planet2 or route.planet1 == planet2 and route.planet2 == planet1:
                 return route
         return None
 
@@ -47,6 +47,7 @@ class Map:
         if not self.active:
             self.active = self.hover
             return
+        # print(f"sender: {sender.position}, receiver: {receiver.position}")
         route = self.get_route(sender, receiver)
         if not route:
             self.active = None
@@ -64,13 +65,23 @@ class Map:
             distance_sorted.sort(key=lambda planet: math.dist(planet.position, position))
             if len(distance_sorted) > 0 and math.dist(distance_sorted[0].position, position) < distance_threshold:
                 continue
-            planet = self.add_planet(position)
+            planet = Planet(position, drones=10, ticks_per_drone=None)
+            self.planets.append(planet)
+
             for i, other_planet in enumerate(distance_sorted):
-                if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*1.75:
+                if i == 0:
                     self.add_route(planet, other_planet)
 
         # test
         self.planets[0].color = "#DD8888"
+        self.planets[0].visible_drones = []
+        self.planets[0].number_of_drones = 0
+        self.planets[0].ticks_per_drone = 10
+
+        self.planets[-1].color = "#88DD88"
+        self.planets[-1].visible_drones = []
+        self.planets[-1].number_of_drones = 0
+        self.planets[-1].ticks_per_drone = 10
 
 
     def tick(self, amount):

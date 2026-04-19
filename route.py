@@ -23,6 +23,7 @@ class Route:
 
     def get_drones(self, amount, visible_drones: list[Drone], origin_planet: Planet):
         if origin_planet == self.planet1:
+            # print(f"route {self.planet1.position} to {self.planet2.position}")
             self.drones.append({
                 "ticks": 0,
                 "amount": amount,
@@ -32,6 +33,7 @@ class Route:
                 "position": self.get_pos_from_tick(0)
             })
         else:
+            # print(f"route {self.planet2.position} to {self.planet1.position}")
             self.drones.append({
                 "ticks": self.ticks_distance,
                 "amount": amount,

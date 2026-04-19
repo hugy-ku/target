@@ -4,12 +4,12 @@ import math
 import random
 
 class Planet:
-    def __init__(self, position: tuple[int, int], size: int, color="#88DD88", ticks_per_drone=10, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200):
+    def __init__(self, position: tuple[int, int], size=100, color="#555555", ticks_per_drone=10, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
         self.position = position
         self.size = size
         self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
-        self.routes: list = []
+        self.routes: list = routes
         self.max_visible_drones = max_visible_drones
         self.tick_count = 0
 
@@ -41,11 +41,12 @@ class Planet:
 
     def tick(self, amount):
         self.tick_count += amount
-        self.ticks_since_last_drone += amount
 
-        self.number_of_drones += self.ticks_since_last_drone // self.ticks_per_drone
-        self.add_visible_drones(self.ticks_since_last_drone // self.ticks_per_drone)
-        self.ticks_since_last_drone %= self.ticks_per_drone
+        if self.ticks_per_drone:
+            self.ticks_since_last_drone += amount
+            self.number_of_drones += self.ticks_since_last_drone // self.ticks_per_drone
+            self.add_visible_drones(self.ticks_since_last_drone // self.ticks_per_drone)
+            self.ticks_since_last_drone %= self.ticks_per_drone
 
         for i, drone in enumerate(self.visible_drones):
             angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
@@ -72,6 +73,8 @@ class Planet:
                     self.visible_drones.insert(0, drone)
         else:
             if self.number_of_drones <= amount*self.vulnerability:
+                if not self.ticks_per_drone:
+                    self.ticks_per_drone = 10
                 self.color = drone_color
                 self.number_of_drones = amount - (self.number_of_drones//self.vulnerability)
                 self.visible_drones = []

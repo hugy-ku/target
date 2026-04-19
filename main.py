@@ -38,7 +38,7 @@ class MainGame:
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
-                print(event) # debug
+                # print(event) # debug
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.handle_input(event)
@@ -108,5 +108,5 @@ class MainGame:
 
 
 if __name__ == "__main__":
-    cProfile.run("MainGame()")
-    # game = MainGame()
+    # cProfile.run("MainGame()")
+    game = MainGame()
