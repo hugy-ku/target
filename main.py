@@ -94,7 +94,7 @@ class MainGame:
             timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
             if event.key in timescales:
                 timescale = int(event.unicode)
-                self.timescale = 2**timescale
+                self.timescale = 2**(timescale-1) # starts from 2^0 (or 1)
                 self.paused = False
                 self.ui.set_paused(self.paused)
                 self.ui.set_timescale(timescale)

@@ -22,7 +22,7 @@ class Planet:
 
         self.visible_drones: list[Drone] = []
         self.number_of_drones = drones
-        self.vulnerability = 2
+        self.vulnerability = 1
 
         self.add_visible_drones(drones)
 
