@@ -54,19 +54,6 @@ class Map:
         self.active.send_drones(self.active.number_of_drones, route)
         self.active = None
 
-    def generate_map(self, map_size):
-        # Generate random planets, remove any that are too close, and maybe k-nearest neighbors where k is limited by the sum of all route distances? There is the problem of the graph being unconnected, but I could just select the largest one and delete the others.
-        self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
-        planet1 = Planet((0, 0), 100)
-        planet2 = Planet((2000, 2000), 100, drones=1000)
-        planet3 = Planet((1000, 1500), 100, color="#DD8888")
-        self.planets.append(planet1)
-        self.planets.append(planet2)
-        self.planets.append(planet3)
-        self.add_route(planet1, planet2)
-        self.add_route(planet1, planet3)
-        self.add_route(planet2, planet3)
-
     def random_generate(self, map_size, target_number_of_planets=10):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         distance_threshold = 500
@@ -78,7 +65,7 @@ class Map:
                 continue
             planet = self.add_planet(position)
             for i, other_planet in enumerate(distance_sorted):
-                if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*2:
+                if i == 0 or math.dist(planet.position, other_planet.position) < distance_threshold*1.5:
                     self.add_route(planet, other_planet)
 
 

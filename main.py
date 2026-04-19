@@ -22,13 +22,15 @@ class MainGame:
         self.time_since_last_tick = 0
 
         self.milliseconds_per_tick = 20
+        self.timescale = 1
 
         self.mainloop()
 
     def mainloop(self):
         while self.running:
-            self.current_time += self.delta_time
-            self.time_since_last_tick += self.delta_time
+            # convert to int in case timescale < 1 and it divides
+            self.current_time += int(self.delta_time * self.timescale)
+            self.time_since_last_tick += int(self.delta_time * self.timescale)
 
             self.handle_hold_inputs()
 
@@ -79,6 +81,16 @@ class MainGame:
             self.mouse_pos = None
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.map.check_active()
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                self.timescale = 1
+            if event.key == pygame.K_2:
+                self.timescale = 2
+            if event.key == pygame.K_3:
+                self.timescale = 4
+            if event.key == pygame.K_4:
+                self.timescale = 8
 
     def tick(self, amount=1):
         self.map.tick(amount)
