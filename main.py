@@ -14,7 +14,7 @@ class MainGame:
         if self.framerate == 0:
             self.framerate = 60
         self.map = Map()
-        self.map.generate_map((2000, 2000))
+        self.map.random_generate((2000, 2000))
         self.renderManager = RenderManager(self.map)
 
         self.mouse_pos = None
