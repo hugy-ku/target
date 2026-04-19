@@ -2,6 +2,7 @@ import pygame
 import time
 from gameMap import Map
 from renderManager import RenderManager
+from gameUi import GameUi
 
 class MainGame:
     def __init__(self):
@@ -13,16 +14,20 @@ class MainGame:
         self.framerate = pygame.display.get_current_refresh_rate()
         if self.framerate == 0:
             self.framerate = 60
+
+        self.timescale = 1
+
         self.map = Map()
         self.map.random_generate((2000, 2000))
-        self.renderManager = RenderManager(self.map)
+        self.ui = GameUi(self.timescale)
+        self.renderManager = RenderManager(self.map, self.ui)
+
 
         self.mouse_pos = None
         self.current_time = 0
         self.time_since_last_tick = 0
 
         self.milliseconds_per_tick = 20
-        self.timescale = 1
 
         self.mainloop()
 
@@ -85,12 +90,16 @@ class MainGame:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
                 self.timescale = 1
+                self.ui.set_timescale(1)
             if event.key == pygame.K_2:
                 self.timescale = 2
+                self.ui.set_timescale(2)
             if event.key == pygame.K_3:
                 self.timescale = 4
+                self.ui.set_timescale(3)
             if event.key == pygame.K_4:
                 self.timescale = 8
+                self.ui.set_timescale(4)
 
     def tick(self, amount=1):
         self.map.tick(amount)

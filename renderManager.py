@@ -1,10 +1,12 @@
 import pygame
 from gameMap import Map
+from gameUi import GameUi
 import math
 
 class RenderManager:
-    def __init__(self, map: Map):
+    def __init__(self, map: Map, ui: GameUi):
         self.map = map
+        self.ui = ui
         self.zoom_level = 1
         self.viewport = map.map_rect.copy()
 
@@ -50,10 +52,10 @@ class RenderManager:
         screen.fill("#777777")
         self.viewport.width = screen.width
         self.viewport.height = screen.height
-        render_info = self.map.get_render_info()
+        map_info = self.map.get_render_info()
         scale_amount = screen.height/self.map.map_rect.height * self.zoom_level
 
-        for route_info in render_info["routes"]:
+        for route_info in map_info["routes"]:
             position1 = route_info["position1"]
             position1 = (position1[0]-self.viewport.left, position1[1]-self.viewport.top)
             position1 = (position1[0]*scale_amount, position1[1]*scale_amount)
@@ -72,7 +74,7 @@ class RenderManager:
                     size = drone_info["size"] * scale_amount
                     pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
-        for planet_info in render_info["planets"]:
+        for planet_info in map_info["planets"]:
 
             for drone in planet_info["drones"]:
                 drone_info = drone.get_render_info()
@@ -94,18 +96,33 @@ class RenderManager:
 
         ##### planet selection rendering
 
-        if render_info["hover"]:
-            planet_info = render_info["hover"]
+        if map_info["hover"]:
+            planet_info = map_info["hover"]
             position = planet_info["position"]
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.25, int(size*0.125))
 
-        if render_info["active"]:
-            planet_info = render_info["active"]
+        if map_info["active"]:
+            planet_info = map_info["active"]
             position = planet_info["position"]
             position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
             position = (position[0]*scale_amount, position[1]*scale_amount)
             size = planet_info["size"] * scale_amount
             self.circle_arc(screen, "#AAAAAA", position, size*1.5, int(size*0.15), 4, 1, current_time*0.00125)
+
+        # UI rendering
+
+        ui_infos = self.ui.get_render_info()
+        for ui_info in ui_infos:
+            if ui_info["type"] == "text":
+                font = pygame.font.Font(None, int(size/self.zoom_level))
+                font_size = font.size(ui_info["text"])
+
+                if ui_info["position"] == "bottomright":
+                    position = list(screen.size)
+                    position[0] -= ui_info["padding"][0] + font_size[0]
+                    position[1] -= ui_info["padding"][1] + font_size[1]
+
+                screen.blit(font.render(ui_info["text"], False, ui_info["color"]), position)
