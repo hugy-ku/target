@@ -3,6 +3,7 @@ import time
 from gameMap import Map
 from renderManager import RenderManager
 from gameUi import GameUi
+import cProfile
 
 class MainGame:
     def __init__(self):
@@ -34,7 +35,6 @@ class MainGame:
 
     def mainloop(self):
         while self.running:
-
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
@@ -55,7 +55,7 @@ class MainGame:
             self.renderManager.render(self.screen, self.delta_time)
 
             pygame.display.flip()
-            self.delta_time = self.clock.tick()
+            self.delta_time = self.clock.tick(self.framerate)
 
 
     def handle_hold_inputs(self):
@@ -108,4 +108,5 @@ class MainGame:
 
 
 if __name__ == "__main__":
-    game = MainGame()
+    cProfile.run("MainGame()")
+    # game = MainGame()
