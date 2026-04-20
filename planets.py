@@ -89,6 +89,7 @@ class Planet:
                 self.visible_drones = []
                 self.add_visible_drones(self.number_of_drones)
                 self.drones_defending = 0
+                self.autosend = None
             else:
                 self.number_of_drones -= amount*self.vulnerability
                 self.drones_defending -= amount*self.vulnerability
@@ -100,6 +101,8 @@ class Planet:
         if self.autosend:
             planets = self.autosend.get_planets(self)
             autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
+            distance = math.dist(planets[1].position, planets[0].position)
+            autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         else: autosend = None
         return {
             "position": self.position,

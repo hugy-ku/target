@@ -50,6 +50,12 @@ class RenderManager:
                 width
             )
 
+    def triangle(self, screen, color, position: tuple[int, int], direction: tuple[float, float], pokey_mult: float, scale_amount):
+        pos1 = self.convert_game_pos((position[0]+direction[1]*0.75, position[1]-direction[0]*0.75))
+        pos2 = self.convert_game_pos((position[0]-direction[1]*0.75, position[1]+direction[0]*0.75))
+        pos3 = self.convert_game_pos((position[0]+direction[0]*pokey_mult, position[1]+direction[1]*pokey_mult))
+        pygame.draw.polygon(screen, color, (pos1, pos2, pos3))
+
     def render(self, screen: pygame.Surface, delta_time):
         # code is not awful anymore yay :)
         self.current_time += delta_time
@@ -89,10 +95,12 @@ class RenderManager:
                 size = drone_info["size"] * scale_amount
                 pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
+            if planet_info["autosend"]:
+                self.triangle(screen, "#EEEEEE", planet_info["position"], planet_info["autosend"], 1.5, scale_amount)
+
             position = self.convert_game_pos(planet_info["position"])
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
-
 
             font_size = font.size(str(planet_info["amount"]))
             screen.blit(font.render(str(planet_info["amount"]), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
