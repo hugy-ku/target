@@ -19,7 +19,7 @@ class Planet:
         self.ticks_per_orbit = 1000
         self.ticks_since_last_drone = 0
         self.angle_per_tick = (2*math.pi)/self.ticks_per_orbit
-        self.orbit_distance = self.size*2
+        self.orbit_distance = self.size*1.5
         self.drones_defending = 0 # purely visual dw about it too much
 
         self.visible_drones: list[Drone] = []
@@ -132,25 +132,17 @@ class FactoryPlanet(Planet):
         render_info["type"] = "factory"
         return render_info
 
-class TurretPlanet(Planet):
+class FortPlanet(Planet):
     cost = 10
     def __init__(self, position, color="#555555", drones=0, routes=[]):
         super().__init__(position, color, drones, routes)
         self.ticks_per_drone *= 2
-        self.gun_ticks = 0
+        self.vulnerability /= 3
 
     def tick(self, amount):
         super().tick(amount)
-        self.gun_ticks += amount
-        minimum_distance = math.dist(self.routes[0].planet1.position, self.routes[0].planet2.position)
-
-        for route in self.routes:
-            pass
 
     def get_render_info(self):
         render_info = super().get_render_info()
-        render_info["type"] = "turret"
-        # autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
-        # distance = math.dist(planets[1].position, planets[0].position)
-        # autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
+        render_info["type"] = "fort"
         return render_info

@@ -62,13 +62,16 @@ class Map:
         if self.hover and self.active and self.active != self.hover:
             if button == 1:
                 self.send_drones(self.active, self.hover, 1)
+                self.active = None
             elif button == 3:
                 self.send_drones(self.active, self.hover,0.5)
-            self.active = None
+                # not adding self.active = None here since sending half implies that you want to continue sending more
         if not self.hover:
             self.active = None
 
     def mouseup(self, button):
+        if button != 1:
+            return
         if not self.hover or self.hover and self.hover == self.active:
             self.dragging = None
             if not self.first_drag and self.active:
@@ -112,17 +115,17 @@ class Map:
         self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
         self.active = None
 
-    def upgrade_defensive(self):
+    def upgrade_fort(self):
         if not self.active:
             return
-        if isinstance(self.active, TurretPlanet):
+        if isinstance(self.active, FortPlanet):
             self.active = None
-            self.set_alert("Planet is already a factory")
+            self.set_alert("Planet is already a turret")
             return
-        if self.active.number_of_drones < FactoryPlanet.cost:
-            self.set_alert(f"You need {FactoryPlanet.cost} drones to upgrade")
+        if self.active.number_of_drones < FortPlanet.cost:
+            self.set_alert(f"You need {FortPlanet.cost} drones to upgrade")
             return
-        self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
+        self.replace_planet(self.active, FortPlanet(self.active.position, self.active.color, self.active.number_of_drones-FortPlanet.cost, self.active.routes))
         self.active = None
 
     def shuffle_planet(self, planet: Planet):

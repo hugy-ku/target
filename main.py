@@ -105,6 +105,9 @@ class MainGame:
                 self.paused = not self.paused
                 self.ui.set_paused(self.paused)
 
+            if event.key == pygame.K_q:
+                self.map.upgrade_fort()
+
             if event.key == pygame.K_e:
                 self.map.upgrade_factory()
 

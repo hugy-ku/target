@@ -102,6 +102,13 @@ class RenderManager:
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
 
+            if planet_info["type"] == "fort":
+                color = pygame.color.Color(planet_info["color"])
+                color.r -= 32
+                color.g -= 32
+                color.b -= 32
+                self.circle_arc(screen, color, position, size*1.1, int(size*0.1), 6, 0.75, self.current_time*0.001)
+
             if planet_info["type"] == "factory":
                 color = pygame.color.Color(planet_info["color"])
                 color.r -= 32
