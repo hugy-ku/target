@@ -30,7 +30,8 @@ class Route:
                 "visible_drones": visible_drones,
                 "color": origin_planet.color,
                 "reverse": False,
-                "position": self.get_pos_from_tick(0)
+                "position": self.get_pos_from_tick(0),
+                "attacking": False
             })
         else:
             # print(f"route {self.planet2.position} to {self.planet1.position}")
@@ -40,7 +41,8 @@ class Route:
                 "visible_drones": visible_drones,
                 "color": origin_planet.color,
                 "reverse": True,
-                "position": self.get_pos_from_tick(self.ticks_distance)
+                "position": self.get_pos_from_tick(self.ticks_distance),
+                "attacking": False
             })
 
     def tick(self, amount):
@@ -48,16 +50,18 @@ class Route:
 
             if not drones["reverse"]:
                 drones["ticks"] += amount
-                if drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance-self.planet2.size:
-                    self.planet2.set_defending_drones(len(drones["visible_drones"]))
+                if not drones["attacking"] and drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance-self.planet2.size:
+                    self.planet2.add_defending_drones(len(drones["visible_drones"]))
+                    drones["attacking"] = True
                 if drones["ticks"] >= self.ticks_distance:
                     self.drones.remove(drones)
                     self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
                 drones["ticks"] -= amount
-                if drones["color"] != self.planet1.color and drones["ticks"] <= self.planet1.size:
-                    self.planet1.set_defending_drones(len(drones["visible_drones"]))
+                if not drones["attacking"] and drones["color"] != self.planet1.color and drones["ticks"] <= self.planet1.size:
+                    self.planet1.add_defending_drones(len(drones["visible_drones"]))
+                    drones["attacking"] = True
                 if drones["ticks"] <= 0:
                     self.drones.remove(drones)
                     self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])

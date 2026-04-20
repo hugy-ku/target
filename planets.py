@@ -23,6 +23,7 @@ class Planet:
         self.visible_drones: list[Drone] = []
         self.number_of_drones = drones
         self.vulnerability = 1
+        self.autosend = False
 
         self.add_visible_drones(drones)
 
@@ -30,16 +31,23 @@ class Planet:
         if amount <= 0:
             return
         for _ in range(amount):
+            if len(self.visible_drones) >= self.max_visible_drones:
+                break
             self.visible_drones.insert(0, Drone(self.position, self.color, random.random(), random.randint(0, self.ticks_per_orbit), self.size//20))
-        self.visible_drones = self.visible_drones[:self.max_visible_drones]
 
     def add_route(self, route):
         self.routes.append(route)
 
-    def set_defending_drones(self, amount):
-        self.drones_defending = amount * self.vulnerability
+    def add_defending_drones(self, amount):
+        self.drones_defending += amount * self.vulnerability
+        print(f"added {amount} defending drones")
+
+    def autosend_drones(self, route):
+        self.autosend = route
 
     def tick(self, amount):
+        if self.drones_defending > 0:
+            print(self.visible_drones, "1")
         self.tick_count += amount
 
         if self.ticks_per_drone:
@@ -47,13 +55,17 @@ class Planet:
             self.number_of_drones += self.ticks_since_last_drone // self.ticks_per_drone
             self.add_visible_drones(self.ticks_since_last_drone // self.ticks_per_drone)
             self.ticks_since_last_drone %= self.ticks_per_drone
+            if self.autosend and self.number_of_drones > 0:
+                self.send_drones(self.number_of_drones, self.autosend)
 
         for i, drone in enumerate(self.visible_drones):
-            angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
             if i >= len(self.visible_drones)-self.drones_defending:
                 drone.set_target(self.position)
             else:
+                angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
                 drone.set_target((self.position[0]+(self.orbit_distance*(drone.offset/1.5+1))*math.cos(angle), self.position[1]+(self.orbit_distance*(drone.offset/1.5+1))*math.sin(angle)))
+        if self.drones_defending > 0:
+            print(self.visible_drones, "2")
 
     def render_tick(self, timescale):
         for drone in self.visible_drones:
@@ -65,25 +77,29 @@ class Planet:
         route.get_drones(amount, new_drones, self)
 
     def get_drones(self, amount, visible_drones, drone_color):
-        if drone_color == self.color:
+        if drone_color == self.color: # adding drones
             self.number_of_drones += amount
             for drone in visible_drones:
                 if len(self.visible_drones) < self.max_visible_drones:
                     drone.position = self.position
                     self.visible_drones.insert(0, drone)
-        else:
-            if self.number_of_drones <= amount*self.vulnerability:
+            if self.autosend:
+                self.send_drones(self.number_of_drones, self.autosend)
+        else: # getting attacked
+            if self.number_of_drones <= amount*self.vulnerability: # if planet gets captured
                 if not self.ticks_per_drone:
                     self.ticks_per_drone = 30
                 self.color = drone_color
                 self.number_of_drones = amount - (self.number_of_drones//self.vulnerability)
                 self.visible_drones = []
                 self.add_visible_drones(self.number_of_drones)
+                self.drones_defending = 0
             else:
                 self.number_of_drones -= amount*self.vulnerability
-                self.visible_drones = self.visible_drones[:-self.drones_defending]
-                self.add_visible_drones(min(self.number_of_drones-len(self.visible_drones), self.max_visible_drones-len(self.visible_drones)))
-        self.drones_defending = 0
+                self.drones_defending -= amount*self.vulnerability
+                self.visible_drones = self.visible_drones[:-(amount*self.vulnerability)]
+                self.add_visible_drones(self.number_of_drones-len(self.visible_drones))
+        # self.drones_defending = max(self.drones_defending-amount*self.vulnerability, 0)
 
     def get_render_info(self):
         return {

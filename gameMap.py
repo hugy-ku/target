@@ -12,6 +12,8 @@ class Map:
         self.routes: list[Route] = []
         self.active = None
         self.hover = None
+        self.dragging = False
+        self.first_drag = False
 
     def add_planet(self, position, size=100):
         planet = Planet(position, size)
@@ -37,24 +39,42 @@ class Map:
                 return
         self.hover = None
 
-    def check_active(self):
-        if self.hover and self.active != self.hover:
-            self.select_planet(self.active, self.hover)
-        else:
+    def mousedown(self):
+        if self.hover and self.hover == self.active:
+            self.dragging = self.active
+            self.first_drag = False
+        if self.hover and not self.active:
+            self.active = self.hover
+            self.dragging = self.active
+            self.first_drag = True
+
+        if self.hover and self.active and self.active != self.hover:
+            self.send_drones(self.active, self.hover)
+            self.active = None
+        if not self.hover:
             self.active = None
 
-    def select_planet(self, sender, receiver):
-        if not self.active:
-            self.active = self.hover
+    def mouseup(self):
+        if not self.hover or self.hover and self.hover == self.active:
+            self.dragging = None
+            if not self.first_drag:
+                self.active = None
             return
+        if self.active and self.active != self.hover:
+            self.autosend_drones(self.active, self.hover)
+            self.active = None
+            self.dragging = None
+
+    def autosend_drones(self, sender: Planet, receiver: Planet):
+        route = self.get_route(sender, receiver)
+        self.active.autosend_drones(route)
+
+    def send_drones(self, sender: Planet, receiver: Planet):
         # print(f"sender: {sender.position}, receiver: {receiver.position}")
         route = self.get_route(sender, receiver)
         if not route:
-            self.active = None
             return
-
-        self.active.send_drones(self.active.number_of_drones, route)
-        self.active = None
+        sender.send_drones(sender.number_of_drones, route)
 
     def random_generate(self, map_size, target_number_of_planets=10):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
