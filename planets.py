@@ -4,20 +4,20 @@ import math
 import random
 
 class Planet:
-    def __init__(self, position: tuple[int, int], size=100, color="#555555", ticks_per_drone=30, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
+    def __init__(self, position: tuple[int, int], color="#555555", drones=0, routes=[]):
         self.position = position
-        self.size = size
+        self.size = 100
         self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list = routes
-        self.max_visible_drones = max_visible_drones
+        self.max_visible_drones = 200
         self.tick_count = 0
 
-        self.ticks_per_drone = ticks_per_drone
-        self.ticks_per_orbit = ticks_per_orbit
+        self.ticks_per_drone = 10
+        self.ticks_per_orbit = 1000
         self.ticks_since_last_drone = 0
-        self.angle_per_tick = (2*math.pi)/ticks_per_orbit
-        self.orbit_distance = self.size*orbit_distance
+        self.angle_per_tick = (2*math.pi)/self.ticks_per_orbit
+        self.orbit_distance = self.size*2
         self.drones_defending = 0 # purely visual dw about it too much
 
         self.visible_drones: list[Drone] = []
@@ -81,27 +81,19 @@ class Planet:
                 if len(self.visible_drones) < self.max_visible_drones:
                     drone.position = self.position
                     self.visible_drones.insert(0, drone)
-            if self.autosend:
-                self.send_drones(self.number_of_drones, self.autosend)
         else: # getting attacked
             if self.number_of_drones <= amount*self.vulnerability: # if planet gets captured
-                if not self.ticks_per_drone:
-                    self.ticks_per_drone = 30
-                self.color = drone_color
-                self.number_of_drones = amount - (self.number_of_drones//self.vulnerability)
-                self.visible_drones = []
-                self.add_visible_drones(self.number_of_drones)
-                self.drones_defending = 0
-                self.autosend = None
+                return Planet(self.position, drone_color, amount-(self.number_of_drones//self.vulnerability), self.routes)
             else:
                 self.number_of_drones -= amount*self.vulnerability
                 self.drones_defending -= amount*self.vulnerability
                 self.visible_drones = self.visible_drones[:-(amount*self.vulnerability)]
                 self.add_visible_drones(self.number_of_drones-len(self.visible_drones))
+                return None
         # self.drones_defending = max(self.drones_defending-amount*self.vulnerability, 0)
 
     def get_render_info(self):
-        if self.autosend:
+        if self.autosend and self.autosend.get_planets(self):
             planets = self.autosend.get_planets(self)
             autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
             distance = math.dist(planets[1].position, planets[0].position)
@@ -116,3 +108,6 @@ class Planet:
             "autosend": autosend
         }
 
+class UnclaimedPlanet(Planet):
+    def __init__(self, position, size=100, color="#555555", ticks_per_drone=30, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
+        super().__init__(position, size, color, ticks_per_drone, ticks_per_orbit, orbit_distance, drones, max_visible_drones, routes)

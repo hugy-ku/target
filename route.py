@@ -21,6 +21,13 @@ class Route:
             (planet2.position[1]-planet1.position[1])/self.ticks_distance
         )
 
+    def replace_planet(self, origin, replacing):
+
+        if origin == self.planet1:
+            self.planet1 = replacing
+        if origin == self.planet2:
+            self.planet2 = replacing
+
     def get_planets(self, origin):
         if origin == self.planet1:
             return self.planet1, self.planet2
@@ -52,25 +59,29 @@ class Route:
             })
 
     def tick(self, amount):
+        old_planet = None
+        new_planet = None
         for drones in self.drones:
 
             if not drones["reverse"]:
+                old_planet = self.planet2
                 drones["ticks"] += amount
                 if not drones["attacking"] and drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance-self.planet2.size:
                     self.planet2.add_defending_drones(len(drones["visible_drones"]))
                     drones["attacking"] = True
                 if drones["ticks"] >= self.ticks_distance:
                     self.drones.remove(drones)
-                    self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    new_planet = self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
+                old_planet = self.planet1
                 drones["ticks"] -= amount
                 if not drones["attacking"] and drones["color"] != self.planet1.color and drones["ticks"] <= self.planet1.size:
                     self.planet1.add_defending_drones(len(drones["visible_drones"]))
                     drones["attacking"] = True
                 if drones["ticks"] <= 0:
                     self.drones.remove(drones)
-                    self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    new_planet = self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
 
             for other_drones in self.drones:
@@ -84,15 +95,24 @@ class Route:
                     drones["visible_drones"] = drones["visible_drones"][:min(drones["amount"], len(drones["visible_drones"]))]
                     other_drones["visible_drones"] = other_drones["visible_drones"][:min(other_drones["amount"], len(other_drones["visible_drones"]))]
                     if drones["amount"] <= 0:
-                        self.drones.remove(drones)
+                        try:
+                            self.drones.remove(drones)
+                        except ValueError:
+                            pass
                         break
-                    if other_drones["amount"] <= 0: self.drones.remove(other_drones)
+                    if other_drones["amount"] <= 0:
+                        try:
+                            self.drones.remove(other_drones)
+                        except ValueError:
+                            pass
 
             for drone in drones["visible_drones"]:
                 drone.set_target((
                     drones["position"][0] + 100*((drone.offset)*math.cos(drone.angle_offset)),
                     drones["position"][1] + 100*((drone.offset)*math.sin(drone.angle_offset))
                 ))
+
+        return (old_planet, new_planet) if new_planet and old_planet else None
 
     def render_tick(self, timescale):
         for drones in self.drones:

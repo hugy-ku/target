@@ -100,14 +100,14 @@ class Map:
             distance_sorted = self.planets.copy()
 
             if len(distance_sorted) <= 0:
-                planet = Planet(position, drones=10, ticks_per_drone=None)
+                planet = Planet(position, drones=10)
                 self.planets.append(planet)
                 continue
 
             distance_sorted.sort(key=lambda planet: math.dist(planet.position, position))
             if math.dist(distance_sorted[0].position, position) < self.distance_threshold/2:
                 continue
-            planet = Planet(position, drones=10, ticks_per_drone=None)
+            planet = Planet(position, drones=10)
             self.planets.append(planet)
 
         for planet in self.planets:
@@ -129,19 +129,24 @@ class Map:
         self.planets[0].color = "#DD8888"
         self.planets[0].visible_drones = []
         self.planets[0].number_of_drones = 0
-        self.planets[0].ticks_per_drone = 30
 
         self.planets[-1].color = "#88DD88"
         self.planets[-1].visible_drones = []
         self.planets[-1].number_of_drones = 0
-        self.planets[-1].ticks_per_drone = 30
 
 
     def tick(self, amount):
         for planet in self.planets:
             planet.tick(amount)
         for route in self.routes:
-            route.tick(amount)
+            new_planets = route.tick(amount)
+            if new_planets:
+                try:
+                    for new_route in new_planets[0].routes:
+                        new_route.replace_planet(new_planets[0], new_planets[1])
+                    self.planets[self.planets.index(new_planets[0])] = new_planets[1]
+                except ValueError:
+                    continue
 
     def render_tick(self, timescale):
         for planet in self.planets:
