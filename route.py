@@ -15,7 +15,7 @@ class Route:
         x2 = max(self.planet1.position[0]+self.planet1.size, self.planet2.position[0]+self.planet2.size)
         y2 = max(self.planet1.position[1]+self.planet1.size, self.planet2.position[1]+self.planet2.size)
         self.rect = pygame.Rect(x1, y1, x2-x1, y2-y1)
-        self.ticks_distance = math.dist((x1, y1), (x2, y2))/5
+        self.ticks_distance = int(math.dist((x1, y1), (x2, y2))/5)
         self.distance_per_tick = (
             (planet2.position[0]-planet1.position[0])/self.ticks_distance,
             (planet2.position[1]-planet1.position[1])/self.ticks_distance
@@ -72,6 +72,21 @@ class Route:
                     self.drones.remove(drones)
                     self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
+
+            for other_drones in self.drones:
+                if drones == other_drones:
+                    continue
+                # print(f"comparing {drones["ticks"]} with {other_drones["ticks"]}")
+                if drones["color"] != other_drones["color"] and drones["ticks"] >= other_drones["ticks"]-amount and drones["ticks"] <= other_drones["ticks"]+amount:
+                    temp = drones["amount"]
+                    drones["amount"] -= other_drones["amount"]
+                    other_drones["amount"] -= temp
+                    drones["visible_drones"] = drones["visible_drones"][:min(drones["amount"], len(drones["visible_drones"]))]
+                    other_drones["visible_drones"] = other_drones["visible_drones"][:min(other_drones["amount"], len(other_drones["visible_drones"]))]
+                    if drones["amount"] <= 0:
+                        self.drones.remove(drones)
+                        break
+                    if other_drones["amount"] <= 0: self.drones.remove(other_drones)
 
             for drone in drones["visible_drones"]:
                 drone.set_target((
