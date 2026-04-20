@@ -15,6 +15,12 @@ class Map:
         self.dragging = False
         self.first_drag = False
         self.distance_threshold = 500
+        self.alert = ""
+        self.alert_timer = 0
+
+    def set_alert(self, alert):
+        self.alert = alert
+        self.alert_timer = 2000
 
     def add_planet(self, position, size=100):
         planet = Planet(position, size)
@@ -84,9 +90,23 @@ class Map:
             return
         sender.send_drones(sender.number_of_drones, route)
 
-    def replace_routes(self, origin, replacing):
+    def replace_planet(self, origin, replacing):
         for new_route in origin.routes:
             new_route.replace_planet(origin, replacing)
+        self.planets[self.planets.index(origin)] = replacing
+
+    def upgrade_factory(self):
+        if not self.active:
+            return
+        if isinstance(self.active, FactoryPlanet):
+            self.active = None
+            self.set_alert("Planet is already a factory")
+            return
+        if self.active.number_of_drones < FactoryPlanet.cost:
+            self.set_alert(f"You need {FactoryPlanet.cost} drones to upgrade")
+            return
+        self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
+        self.active = None
 
     def shuffle_planet(self, planet: Planet):
         planet_position = planet.position
@@ -130,24 +150,24 @@ class Map:
                 self.add_route(planet, other_planets[0])
 
         # test
-        new_planet = Planet(self.planets[0].position, "#DD8888", routes=self.planets[0].routes)
-        self.replace_routes(self.planets[0], new_planet)
-        self.planets[0] = new_planet
-        new_planet = Planet(self.planets[-1].position, "#88DD88", routes=self.planets[0].routes)
-        self.replace_routes(self.planets[-1], new_planet)
-        self.planets[-1] = new_planet
-
+        self.replace_planet(self.planets[0], Planet(self.planets[0].position, "#DD8888", routes=self.planets[0].routes))
+        self.replace_planet(self.planets[-1], Planet(self.planets[-1].position, "#88DD88", routes=self.planets[0].routes))
 
     def tick(self, amount):
+
         for planet in self.planets:
             planet.tick(amount)
         for route in self.routes:
             new_planets = route.tick(amount)
             if new_planets:
-                self.replace_routes(new_planets[0], new_planets[1])
-                self.planets[self.planets.index(new_planets[0])] = new_planets[1]
+                self.replace_planet(new_planets[0], new_planets[1])
 
     def render_tick(self, timescale):
+        if self.alert_timer > 0:
+            self.alert_timer -= timescale
+            if self.alert_timer <= 0:
+                self.alert = None
+
         for planet in self.planets:
             planet.render_tick(timescale)
         for route in self.routes:

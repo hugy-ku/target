@@ -4,6 +4,7 @@ import math
 import random
 
 class Planet:
+    cost = 0
     def __init__(self, position: tuple[int, int], color="#555555", drones=0, routes=[]):
         self.position = position
         self.size = 100
@@ -101,6 +102,7 @@ class Planet:
             autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         else: autosend = None
         return {
+            "type": "normal",
             "position": self.position,
             "size": self.size,
             "color": self.color,
@@ -116,3 +118,10 @@ class UnclaimedPlanet(Planet):
 
     def get_drones(self, amount, visible_drones, drone_color):
         return super().get_drones(amount, visible_drones, drone_color)
+
+class FactoryPlanet(Planet):
+    cost = 25
+    def __init__(self, position, color="#555555", drones=0, routes=[]):
+        super().__init__(position, color, drones, routes)
+        self.ticks_per_drone = self.ticks_per_drone//2
+        self.vulnerability *= 2

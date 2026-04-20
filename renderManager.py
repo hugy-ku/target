@@ -143,6 +143,8 @@ class RenderManager:
                     position = [screen.width, screen.height]
                     position[0] -= font_size[0]
                     position[1] -= font_size[1]
+                if ui_info["position"] == "bottom":
+                    position = [(screen.width-font_size[0])/2, screen.height-font_size[1]]
 
                 position[0] += ui_info["offset"][0]
                 position[1] += ui_info["offset"][1]

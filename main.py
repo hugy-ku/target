@@ -105,6 +105,9 @@ class MainGame:
                 self.paused = not self.paused
                 self.ui.set_paused(self.paused)
 
+            if event.key == pygame.K_e:
+                self.map.upgrade_factory()
+
     def tick(self, amount=1):
         self.map.tick(amount)
 
