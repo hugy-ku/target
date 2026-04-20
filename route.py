@@ -66,7 +66,7 @@ class Route:
             if not drones["reverse"]:
                 old_planet = self.planet2
                 drones["ticks"] += amount
-                if not drones["attacking"] and drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance-self.planet2.size:
+                if not drones["attacking"] and drones["color"] != self.planet2.color and drones["ticks"] >= self.ticks_distance*0.75:
                     self.planet2.add_defending_drones(len(drones["visible_drones"]))
                     drones["attacking"] = True
                 if drones["ticks"] >= self.ticks_distance:
@@ -76,7 +76,7 @@ class Route:
             else:
                 old_planet = self.planet1
                 drones["ticks"] -= amount
-                if not drones["attacking"] and drones["color"] != self.planet1.color and drones["ticks"] <= self.planet1.size:
+                if not drones["attacking"] and drones["color"] != self.planet1.color and drones["ticks"] <= self.ticks_distance*0.25:
                     self.planet1.add_defending_drones(len(drones["visible_drones"]))
                     drones["attacking"] = True
                 if drones["ticks"] <= 0:

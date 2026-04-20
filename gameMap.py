@@ -1,5 +1,5 @@
 import pygame
-from planets import Planet
+from planets import *
 from route import Route
 import random
 import math
@@ -84,6 +84,10 @@ class Map:
             return
         sender.send_drones(sender.number_of_drones, route)
 
+    def replace_routes(self, origin, replacing):
+        for new_route in origin.routes:
+            new_route.replace_planet(origin, replacing)
+
     def shuffle_planet(self, planet: Planet):
         planet_position = planet.position
         distance_sorted = self.planets
@@ -100,14 +104,14 @@ class Map:
             distance_sorted = self.planets.copy()
 
             if len(distance_sorted) <= 0:
-                planet = Planet(position, drones=10)
+                planet = UnclaimedPlanet(position)
                 self.planets.append(planet)
                 continue
 
             distance_sorted.sort(key=lambda planet: math.dist(planet.position, position))
             if math.dist(distance_sorted[0].position, position) < self.distance_threshold/2:
                 continue
-            planet = Planet(position, drones=10)
+            planet = UnclaimedPlanet(position)
             self.planets.append(planet)
 
         for planet in self.planets:
@@ -126,13 +130,12 @@ class Map:
                 self.add_route(planet, other_planets[0])
 
         # test
-        self.planets[0].color = "#DD8888"
-        self.planets[0].visible_drones = []
-        self.planets[0].number_of_drones = 0
-
-        self.planets[-1].color = "#88DD88"
-        self.planets[-1].visible_drones = []
-        self.planets[-1].number_of_drones = 0
+        new_planet = Planet(self.planets[0].position, "#DD8888", routes=self.planets[0].routes)
+        self.replace_routes(self.planets[0], new_planet)
+        self.planets[0] = new_planet
+        new_planet = Planet(self.planets[-1].position, "#88DD88", routes=self.planets[0].routes)
+        self.replace_routes(self.planets[-1], new_planet)
+        self.planets[-1] = new_planet
 
 
     def tick(self, amount):
@@ -141,12 +144,8 @@ class Map:
         for route in self.routes:
             new_planets = route.tick(amount)
             if new_planets:
-                try:
-                    for new_route in new_planets[0].routes:
-                        new_route.replace_planet(new_planets[0], new_planets[1])
-                    self.planets[self.planets.index(new_planets[0])] = new_planets[1]
-                except ValueError:
-                    continue
+                self.replace_routes(new_planets[0], new_planets[1])
+                self.planets[self.planets.index(new_planets[0])] = new_planets[1]
 
     def render_tick(self, timescale):
         for planet in self.planets:

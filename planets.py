@@ -10,10 +10,11 @@ class Planet:
         self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list = routes
+
         self.max_visible_drones = 200
         self.tick_count = 0
 
-        self.ticks_per_drone = 10
+        self.ticks_per_drone = 30
         self.ticks_per_orbit = 1000
         self.ticks_since_last_drone = 0
         self.angle_per_tick = (2*math.pi)/self.ticks_per_orbit
@@ -109,5 +110,9 @@ class Planet:
         }
 
 class UnclaimedPlanet(Planet):
-    def __init__(self, position, size=100, color="#555555", ticks_per_drone=30, ticks_per_orbit=1000, orbit_distance=2, drones=0, max_visible_drones=200, routes=[]):
-        super().__init__(position, size, color, ticks_per_drone, ticks_per_orbit, orbit_distance, drones, max_visible_drones, routes)
+    def __init__(self, position, color="#555555", drones=10, routes=[]):
+        super().__init__(position, color, drones, routes)
+        self.ticks_per_drone = None
+
+    def get_drones(self, amount, visible_drones, drone_color):
+        return super().get_drones(amount, visible_drones, drone_color)
