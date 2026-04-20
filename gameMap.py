@@ -49,22 +49,26 @@ class Map:
                 return
         self.hover = None
 
-    def mousedown(self):
-        if self.hover and self.hover == self.active:
-            self.dragging = self.active
-            self.first_drag = False
-        if self.hover and not self.active:
-            self.active = self.hover
-            self.dragging = self.active
-            self.first_drag = True
+    def mousedown(self, button):
+        if button == 1:
+            if self.hover and self.hover == self.active:
+                self.dragging = self.active
+                self.first_drag = False
+            if self.hover and not self.active:
+                self.active = self.hover
+                self.dragging = self.active
+                self.first_drag = True
 
         if self.hover and self.active and self.active != self.hover:
-            self.send_drones(self.active, self.hover)
+            if button == 1:
+                self.send_drones(self.active, self.hover, 1)
+            elif button == 3:
+                self.send_drones(self.active, self.hover,0.5)
             self.active = None
         if not self.hover:
             self.active = None
 
-    def mouseup(self):
+    def mouseup(self, button):
         if not self.hover or self.hover and self.hover == self.active:
             self.dragging = None
             if not self.first_drag and self.active:
@@ -83,12 +87,12 @@ class Map:
     def stop_autosend(self, planet: Planet):
         planet.stop_autosend()
 
-    def send_drones(self, sender: Planet, receiver: Planet):
+    def send_drones(self, sender: Planet, receiver: Planet, amount):
         # print(f"sender: {sender.position}, receiver: {receiver.position}")
         route = self.get_route(sender, receiver)
         if not route:
             return
-        sender.send_drones(sender.number_of_drones, route)
+        sender.send_drones(math.ceil(sender.number_of_drones*amount), route)
 
     def replace_planet(self, origin, replacing):
         for new_route in origin.routes:

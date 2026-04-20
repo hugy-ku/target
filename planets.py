@@ -137,8 +137,20 @@ class TurretPlanet(Planet):
     def __init__(self, position, color="#555555", drones=0, routes=[]):
         super().__init__(position, color, drones, routes)
         self.ticks_per_drone *= 2
+        self.gun_ticks = 0
+
+    def tick(self, amount):
+        super().tick(amount)
+        self.gun_ticks += amount
+        minimum_distance = math.dist(self.routes[0].planet1.position, self.routes[0].planet2.position)
+
+        for route in self.routes:
+            pass
 
     def get_render_info(self):
         render_info = super().get_render_info()
         render_info["type"] = "turret"
+        # autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
+        # distance = math.dist(planets[1].position, planets[0].position)
+        # autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         return render_info

@@ -87,10 +87,10 @@ class MainGame:
             self.mouse_pos = event.pos
         if event.type == pygame.WINDOWLEAVE:
             self.mouse_pos = None
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.map.mousedown()
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            self.map.mouseup()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.map.mousedown(event.button)
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.map.mouseup(event.button)
 
         if event.type == pygame.KEYDOWN:
             timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
