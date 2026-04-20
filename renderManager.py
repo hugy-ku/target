@@ -102,6 +102,13 @@ class RenderManager:
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
 
+            if planet_info["type"] == "factory":
+                color = pygame.color.Color(planet_info["color"])
+                color.r -= 32
+                color.g -= 32
+                color.b -= 32
+                self.circle_arc(screen, color, position, size*0.75, int(size*0.1), 5, 1, self.current_time*-0.001)
+
             font_size = font.size(str(planet_info["amount"]))
             screen.blit(font.render(str(planet_info["amount"]), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
 

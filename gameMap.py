@@ -108,6 +108,19 @@ class Map:
         self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
         self.active = None
 
+    def upgrade_defensive(self):
+        if not self.active:
+            return
+        if isinstance(self.active, TurretPlanet):
+            self.active = None
+            self.set_alert("Planet is already a factory")
+            return
+        if self.active.number_of_drones < FactoryPlanet.cost:
+            self.set_alert(f"You need {FactoryPlanet.cost} drones to upgrade")
+            return
+        self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
+        self.active = None
+
     def shuffle_planet(self, planet: Planet):
         planet_position = planet.position
         distance_sorted = self.planets

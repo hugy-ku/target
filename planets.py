@@ -101,7 +101,7 @@ class Planet:
             distance = math.dist(planets[1].position, planets[0].position)
             autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         else: autosend = None
-        return {
+        render_info = {
             "type": "normal",
             "position": self.position,
             "size": self.size,
@@ -110,6 +110,7 @@ class Planet:
             "drones": self.visible_drones,
             "autosend": autosend
         }
+        return render_info
 
 class UnclaimedPlanet(Planet):
     def __init__(self, position, color="#555555", drones=10, routes=[]):
@@ -125,3 +126,19 @@ class FactoryPlanet(Planet):
         super().__init__(position, color, drones, routes)
         self.ticks_per_drone = self.ticks_per_drone//2
         self.vulnerability *= 2
+
+    def get_render_info(self):
+        render_info = super().get_render_info()
+        render_info["type"] = "factory"
+        return render_info
+
+class TurretPlanet(Planet):
+    cost = 10
+    def __init__(self, position, color="#555555", drones=0, routes=[]):
+        super().__init__(position, color, drones, routes)
+        self.ticks_per_drone *= 2
+
+    def get_render_info(self):
+        render_info = super().get_render_info()
+        render_info["type"] = "turret"
+        return render_info
