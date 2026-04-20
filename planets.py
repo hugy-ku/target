@@ -97,11 +97,16 @@ class Planet:
         # self.drones_defending = max(self.drones_defending-amount*self.vulnerability, 0)
 
     def get_render_info(self):
+        if self.autosend:
+            planets = self.autosend.get_planets(self)
+            autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
+        else: autosend = None
         return {
             "position": self.position,
             "size": self.size,
             "color": self.color,
             "amount": self.number_of_drones,
-            "drones": self.visible_drones
+            "drones": self.visible_drones,
+            "autosend": autosend
         }
 

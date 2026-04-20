@@ -21,6 +21,12 @@ class Route:
             (planet2.position[1]-planet1.position[1])/self.ticks_distance
         )
 
+    def get_planets(self, origin):
+        if origin == self.planet1:
+            return self.planet1, self.planet2
+        if origin == self.planet2:
+            return self.planet2, self.planet1
+
     def get_drones(self, amount, visible_drones: list[Drone], origin_planet: Planet):
         if origin_planet == self.planet1:
             # print(f"route {self.planet1.position} to {self.planet2.position}")

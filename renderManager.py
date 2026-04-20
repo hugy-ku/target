@@ -33,6 +33,11 @@ class RenderManager:
         # print(mouse_x, mouse_y)
         return mouse_x, mouse_y
 
+    def convert_game_pos(self, position: tuple[int, int]):
+        scale_amount = self.viewport.height/self.map.map_rect.height * self.zoom_level
+        position = ((position[0]-self.viewport.left)*scale_amount, (position[1]-self.viewport.top)*scale_amount)
+        return position
+
     def circle_arc(self, screen, color, position, radius, width, arcs, arc_length, angle):
         gap_length = ((2*math.pi) - arc_length*arcs) / arcs
         for arc in range(arcs):
@@ -46,9 +51,7 @@ class RenderManager:
             )
 
     def render(self, screen: pygame.Surface, delta_time):
-        # the reason why the code in this function is awful is because i
-        # intentionally interact with it as little as possible
-        # im NOT going through viewport hell again
+        # code is not awful anymore yay :)
         self.current_time += delta_time
         screen.fill("#777777")
         self.viewport.width = screen.width
@@ -64,21 +67,15 @@ class RenderManager:
 
     def render_routes(self, screen, route_infos, scale_amount):
         for route_info in route_infos:
-            position1 = route_info["position1"]
-            position1 = (position1[0]-self.viewport.left, position1[1]-self.viewport.top)
-            position1 = (position1[0]*scale_amount, position1[1]*scale_amount)
-            position2 = route_info["position2"]
-            position2 = (position2[0]-self.viewport.left, position2[1]-self.viewport.top)
-            position2 = (position2[0]*scale_amount, position2[1]*scale_amount)
+            position1 = self.convert_game_pos(route_info["position1"])
+            position2 = self.convert_game_pos(route_info["position2"])
             route_size = route_info["size"]//3 * scale_amount
             pygame.draw.line(screen, route_info["color"], position1, position2, int(route_size))
 
             for drones in route_info["drones"]:
                 for drone in drones["visible_drones"]:
                     drone_info = drone.get_render_info()
-                    position = drone_info["position"]
-                    position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-                    position = (position[0]*scale_amount, position[1]*scale_amount)
+                    position = self.convert_game_pos(drone_info["position"])
                     size = drone_info["size"] * scale_amount
                     pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
@@ -88,20 +85,18 @@ class RenderManager:
 
             for drone in planet_info["drones"]:
                 drone_info = drone.get_render_info()
-                position = drone_info["position"]
-                position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-                position = (position[0]*scale_amount, position[1]*scale_amount)
+                position = self.convert_game_pos(drone_info["position"])
                 size = drone_info["size"] * scale_amount
                 pygame.draw.circle(screen, drone_info["color"], (position[0], position[1]), size)
 
-            position = planet_info["position"]
-            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-            position = (position[0]*scale_amount, position[1]*scale_amount)
+            position = self.convert_game_pos(planet_info["position"])
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, planet_info["color"], (position[0], position[1]), size)
+
+
             font_size = font.size(str(planet_info["amount"]))
-            # font_size = (2,2)
             screen.blit(font.render(str(planet_info["amount"]), False, "#000000"), (position[0]-font_size[0]/2, position[1]-font_size[1]/2))
+
 
 
         ##### planet selection rendering
@@ -109,17 +104,13 @@ class RenderManager:
     def render_selection(self, screen, hover_planet, active_planet, scale_amount):
         if hover_planet:
             planet_info = hover_planet
-            position = planet_info["position"]
-            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-            position = (position[0]*scale_amount, position[1]*scale_amount)
+            position = self.convert_game_pos(planet_info["position"])
             size = planet_info["size"] * scale_amount
             pygame.draw.circle(screen, "#AAAAAA", (position[0], position[1]), size*1.25, int(size*0.125))
 
         if active_planet:
             planet_info = active_planet
-            position = planet_info["position"]
-            position = (position[0]-self.viewport.left, position[1]-self.viewport.top)
-            position = (position[0]*scale_amount, position[1]*scale_amount)
+            position = self.convert_game_pos(planet_info["position"])
             size = planet_info["size"] * scale_amount
             self.circle_arc(screen, "#AAAAAA", position, size*1.5, int(size*0.15), 4, 1, self.current_time*0.00125)
 
