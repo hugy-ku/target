@@ -40,7 +40,6 @@ class Planet:
 
     def add_defending_drones(self, amount):
         self.drones_defending += amount * self.vulnerability
-        print(f"added {amount} defending drones")
 
     def autosend_drones(self, route):
         self.autosend = route
