@@ -46,8 +46,6 @@ class Planet:
         self.autosend = route
 
     def tick(self, amount):
-        if self.drones_defending > 0:
-            print(self.visible_drones, "1")
         self.tick_count += amount
 
         if self.ticks_per_drone:
@@ -64,8 +62,6 @@ class Planet:
             else:
                 angle = self.angle_per_tick*(self.tick_count + drone.angle_offset) * 1/(drone.offset+0.5)
                 drone.set_target((self.position[0]+(self.orbit_distance*(drone.offset/1.5+1))*math.cos(angle), self.position[1]+(self.orbit_distance*(drone.offset/1.5+1))*math.sin(angle)))
-        if self.drones_defending > 0:
-            print(self.visible_drones, "2")
 
     def render_tick(self, timescale):
         for drone in self.visible_drones:

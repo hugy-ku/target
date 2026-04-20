@@ -25,7 +25,6 @@ class RenderManager:
         new_map_mouse_pos = self.convert_mouse_pos(mouse_pos)
         self.viewport.left -= new_map_mouse_pos[0]-map_mouse_pos[0]
         self.viewport.top -= new_map_mouse_pos[1]-map_mouse_pos[1]
-        print(map_mouse_pos, self.convert_mouse_pos(mouse_pos))
 
     def convert_mouse_pos(self, mouse_pos):
         # mouse_x uses height because viewport is scaled by height and width would be including OOB parts
