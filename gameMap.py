@@ -14,6 +14,7 @@ class Map:
         self.hover = None
         self.dragging = False
         self.first_drag = False
+        self.distance_threshold = 500
 
     def add_planet(self, position, size=100):
         planet = Planet(position, size)
@@ -57,7 +58,8 @@ class Map:
     def mouseup(self):
         if not self.hover or self.hover and self.hover == self.active:
             self.dragging = None
-            if not self.first_drag:
+            if not self.first_drag and self.active:
+                self.stop_autosend(self.active)
                 self.active = None
             return
         if self.active and self.active != self.hover:
@@ -69,6 +71,9 @@ class Map:
         route = self.get_route(sender, receiver)
         self.active.autosend_drones(route)
 
+    def stop_autosend(self, planet: Planet):
+        planet.stop_autosend()
+
     def send_drones(self, sender: Planet, receiver: Planet):
         # print(f"sender: {sender.position}, receiver: {receiver.position}")
         route = self.get_route(sender, receiver)
@@ -76,21 +81,46 @@ class Map:
             return
         sender.send_drones(sender.number_of_drones, route)
 
+    def shuffle_planet(self, planet: Planet):
+        planet_position = planet.position
+        distance_sorted = self.planets
+        distance_sorted.sort(key=lambda other_planet: math.dist(other_planet.position, planet_position))
+        if math.dist(distance_sorted[0].position, planet_position) < self.distance_threshold:
+            nearest_planet = distance_sorted[0]
+            planet_position = (planet_position[0]-(nearest_planet.position[0]-planet_position[0])*random.random(), planet_position[1]-(nearest_planet.position[1]-planet_position[1])*random.random())
+        planet.position = planet_position
+
     def random_generate(self, map_size, target_number_of_planets=10):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
-        distance_threshold = 500
         for _ in range(target_number_of_planets):
             position = (random.randint(0, map_size[0]), random.randint(0, map_size[1]))
             distance_sorted = self.planets.copy()
+
+            if len(distance_sorted) <= 0:
+                planet = Planet(position, drones=10, ticks_per_drone=None)
+                self.planets.append(planet)
+                continue
+
             distance_sorted.sort(key=lambda planet: math.dist(planet.position, position))
-            if len(distance_sorted) > 0 and math.dist(distance_sorted[0].position, position) < distance_threshold:
+            if math.dist(distance_sorted[0].position, position) < self.distance_threshold/2:
                 continue
             planet = Planet(position, drones=10, ticks_per_drone=None)
             self.planets.append(planet)
 
-            for i, other_planet in enumerate(distance_sorted):
-                if i == 0:
+        for planet in self.planets:
+            for _ in range(5):
+                self.shuffle_planet(planet)
+
+        for i, planet in enumerate(self.planets):
+            other_planets = self.planets[i+1:]
+            if len(other_planets) <= 0:
+                continue
+            other_planets.sort(key=lambda other_planet: math.dist(planet.position, other_planet.position))
+            for other_planet in other_planets:
+                if math.dist(planet.position, other_planet.position) < self.distance_threshold*1.5:
                     self.add_route(planet, other_planet)
+            if not self.get_route(planet, other_planets[0]):
+                self.add_route(planet, other_planets[0])
 
         # test
         self.planets[0].color = "#DD8888"

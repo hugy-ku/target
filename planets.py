@@ -44,6 +44,9 @@ class Planet:
     def autosend_drones(self, route):
         self.autosend = route
 
+    def stop_autosend(self):
+        self.autosend = None
+
     def tick(self, amount):
         self.tick_count += amount
 
