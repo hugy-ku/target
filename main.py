@@ -21,7 +21,7 @@ class MainGame:
 
         self.map = Map()
         self.map.random_generate((2000, 2000))
-        self.ui = GameUi(self.timescale, self.paused)
+        self.ui = GameUi(self.timescale, self.paused, self.map)
         self.renderManager = RenderManager(self.map, self.ui)
 
 

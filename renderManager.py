@@ -129,6 +129,7 @@ class RenderManager:
             if ui_info["type"] == "text":
                 font = pygame.font.Font(None, int(ui_info["size"]*scale_amount))
                 font_size = font.size(ui_info["text"])
+                font_size = (font_size[0], font_size[1]*(ui_info["text"].count("\n")+1))
 
                 if ui_info["position"] == "topleft":
                     position = [0, 0]

@@ -33,6 +33,9 @@ class Map:
                 return route
         return None
 
+    def get_active(self):
+        return self.active
+
     def check_hover(self, map_mouse_pos):
         for planet in self.planets:
             if planet.rect.collidepoint(map_mouse_pos):
