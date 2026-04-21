@@ -5,15 +5,17 @@ class GameAi:
     def __init__(self, map, planets=[], color="#DD8888"):
         self.color = color
         self.map = map
+        self.tick_count = 0
 
     def send_if_able(self, origin: Planet, route: Route, other_planet: Planet):
         if not other_planet.ticks_per_drone:
             extra_drones = 0
         else:
-            extra_drones = route.ticks_distance*other_planet.ticks_per_drone
+            extra_drones = int(route.ticks_distance/other_planet.ticks_per_drone)
+        defense_power = math.ceil((other_planet.number_of_drones+extra_drones)/other_planet.vulnerability)
 
-        if origin.number_of_drones >= other_planet.number_of_drones+extra_drones:
-            origin.send_drones(other_planet.number_of_drones+extra_drones, route)
+        if origin.number_of_drones >= defense_power:
+            origin.send_drones(defense_power, route)
             return True
         return False
 
@@ -25,7 +27,15 @@ class GameAi:
         if not isinstance(planet, FortPlanet) and planet.number_of_drones >= FortPlanet.cost:
             self.map.upgrade_fort(planet)
 
-    def tick(self):
+    def tick(self, amount):
+        self.tick_count += amount
+        if self.tick_count // 100 <= 0:
+            return
+        self.tick_count %= 100
+
+        threatened_planets = []
+        safe_planets = []
+
         for planet in self.map.planets:
             if planet.color != self.color:
                 continue
@@ -39,17 +49,45 @@ class GameAi:
 
             in_danger = False
             unclaimed_planets: list[tuple[Route, Planet]] = []
+            enemy_planets: list[tuple[Route, Planet]] = []
             for route, neighbor in neighbors:
                 if neighbor.color != self.color and not isinstance(neighbor, UnclaimedPlanet):
                     in_danger = True
                 if isinstance(neighbor, UnclaimedPlanet):
                     unclaimed_planets.append((route, neighbor))
+                elif neighbor.color != self.color:
+                    enemy_planets.append((route, neighbor))
 
             for unclaimed_planet in unclaimed_planets:
                 self.send_if_able(planet, unclaimed_planet[0], unclaimed_planet[1])
 
             if not in_danger:
                 self.try_upgrade_factory(planet)
+                safe_planets.append(planet)
+
 
             if in_danger:
-                self.try_upgrade_fort(planet)
+                planet.stop_autosend()
+                if len(enemy_planets) >= 2:
+                    self.try_upgrade_fort(planet)
+                danger_level = 0
+                for enemy_planet in enemy_planets:
+                    self.send_if_able(planet, enemy_planet[0], enemy_planet[1])
+                    danger_level += enemy_planet[1].number_of_drones
+                danger_level -= planet.number_of_drones//2
+                danger_level * planet.vulnerability
+
+                threatened_planets.append({
+                    "planet": planet,
+                    "enemy_drones": danger_level
+                })
+
+        if len(threatened_planets) > 0:
+            threatened_planets.sort(key=lambda planet: planet["enemy_drones"], reverse=True)
+            most_threatened_planet = threatened_planets[0]["planet"]
+            for neighbor_route in most_threatened_planet.routes:
+                neighbor_route: Route
+                neighbor = neighbor_route.get_other_planet(most_threatened_planet)
+                print(safe_planets)
+                if neighbor in safe_planets:
+                    neighbor.autosend_drones(neighbor_route)

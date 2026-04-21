@@ -1,10 +1,10 @@
 import pygame
 import math
-from planets import Planet
+from planets import *
 from drone import Drone
 
 class Route:
-    def __init__(self, planet1: Planet, planet2: Planet, size):
+    def __init__(self, planet1: Planet, planet2: Planet, size=100):
         self.planet1 = planet1
         self.planet2 = planet2
         self.size = size
@@ -28,10 +28,13 @@ class Route:
             self.planet2 = replacing
 
     def get_other_planet(self, origin):
-        if origin == self.planet1:
+        if self.planet1 == origin:
             return self.planet2
-        if origin == self.planet2:
+        if self.planet2 == origin:
             return self.planet1
+
+    def __eq__(self, other):
+        return self.planet1 == other.planet1 and self.planet2 == other.planet2 or self.planet2 == other.planet1 and self.planet1 == other.planet2
 
     def get_drones(self, amount, visible_drones: list[Drone], origin_planet: Planet):
         if origin_planet == self.planet1:
@@ -89,10 +92,11 @@ class Route:
                 # print(f"comparing {drones["ticks"]} with {other_drones["ticks"]}")
                 if drones["color"] != other_drones["color"] and drones["ticks"] >= other_drones["ticks"]-amount and drones["ticks"] <= other_drones["ticks"]+amount:
                     temp = drones["amount"]
-                    drones["amount"] -= other_drones["amount"]
-                    other_drones["amount"] -= temp
-                    drones["visible_drones"] = drones["visible_drones"][:min(drones["amount"], len(drones["visible_drones"]))]
-                    other_drones["visible_drones"] = other_drones["visible_drones"][:min(other_drones["amount"], len(other_drones["visible_drones"]))]
+                    drones["amount"] -= int(other_drones["amount"])
+                    other_drones["amount"] -= int(temp)
+
+                    drones["visible_drones"] = drones["visible_drones"][:max(0, min(drones["amount"], len(drones["visible_drones"])))]
+                    other_drones["visible_drones"] = other_drones["visible_drones"][:max(0, min(other_drones["amount"], len(other_drones["visible_drones"])))]
                     if drones["amount"] <= 0:
                         try:
                             self.drones.remove(drones)

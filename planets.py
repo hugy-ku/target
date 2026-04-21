@@ -41,7 +41,7 @@ class Planet:
         self.routes.append(route)
 
     def add_defending_drones(self, amount):
-        self.drones_defending += amount * self.vulnerability
+        self.drones_defending += math.ceil(amount * self.vulnerability)
 
     def autosend_drones(self, route):
         self.autosend = route
@@ -87,10 +87,10 @@ class Planet:
                     drone.position = self.position
                     self.visible_drones.insert(0, drone)
         else: # getting attacked
-            if self.number_of_drones <= amount*self.vulnerability: # if planet gets captured
-                return Planet(self.position, drone_color, int(amount-(self.number_of_drones/self.vulnerability)), self.routes)
+            attack_amount = math.ceil(amount*self.vulnerability)
+            if self.number_of_drones <= attack_amount: # if planet gets captured
+                return Planet(self.position, drone_color, int((attack_amount-self.number_of_drones)/self.vulnerability), self.routes)
             else:
-                attack_amount = int(amount*self.vulnerability)
                 self.number_of_drones -= attack_amount
                 self.drones_defending -= attack_amount
                 self.visible_drones = self.visible_drones[:-attack_amount]
@@ -141,7 +141,7 @@ class FortPlanet(Planet):
     def __init__(self, position, color="#555555", drones=0, routes=[]):
         super().__init__(position, color, drones, routes)
         self.ticks_per_drone *= 2
-        self.vulnerability /= 3
+        self.vulnerability /= 2
 
     def tick(self, amount):
         super().tick(amount)

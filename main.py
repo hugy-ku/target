@@ -24,7 +24,6 @@ class MainGame:
         self.ui = GameUi(self.timescale, self.paused, self.map)
         self.renderManager = RenderManager(self.map, self.ui)
 
-
         self.mouse_pos = None
         self.current_time = 0
         self.time_since_last_tick = 0

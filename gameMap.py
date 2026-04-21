@@ -34,7 +34,7 @@ class Map:
     def add_route(self, planet1: Planet, planet2: Planet, size=100):
         route = Route(planet1, planet2, size)
         planet1.add_route(route)
-        planet2.add_route(route)
+        # planet2.add_route(route) # me desperately trying and failing to turn a directed graph into and undirected graph
         self.routes.append(route)
 
     def get_route(self, planet1: Planet, planet2: Planet):
@@ -179,7 +179,7 @@ class Map:
             for other_planet in other_planets:
                 if math.dist(planet.position, other_planet.position) < self.distance_threshold*1.5:
                     self.add_route(planet, other_planet)
-            if not self.get_route(planet, other_planets[0]):
+            if Route(planet, other_planets[0]) not in self.routes:
                 self.add_route(planet, other_planets[0])
 
 
@@ -200,7 +200,7 @@ class Map:
             if new_planets:
                 self.replace_planet(new_planets[0], new_planets[1])
         for ai in self.ais:
-            ai.tick()
+            ai.tick(amount)
 
     def render_tick(self, timescale):
         if self.alert_timer > 0:
