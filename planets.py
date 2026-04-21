@@ -10,7 +10,7 @@ class Planet:
         self.size = 100
         self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
-        self.routes: list = routes
+        self.routes: list = routes[:]
 
         self.max_visible_drones = 200
         self.tick_count = 0
@@ -50,7 +50,7 @@ class Planet:
         self.autosend = None
 
     def __eq__(self, other):
-        return self.position == other.position
+        return float(self.position[0]) == float(other.position[0]) and float(self.position[1]) == float(other.position[1])
 
     def tick(self, amount):
         self.tick_count += amount

@@ -34,7 +34,7 @@ class Map:
     def add_route(self, planet1: Planet, planet2: Planet, size=100):
         route = Route(planet1, planet2, size)
         planet1.add_route(route)
-        # planet2.add_route(route) # me desperately trying and failing to turn a directed graph into and undirected graph
+        planet2.add_route(route) # me desperately trying and failing to turn a directed graph into and undirected graph
         self.routes.append(route)
 
     def get_route(self, planet1: Planet, planet2: Planet):
@@ -186,7 +186,7 @@ class Map:
     def new_map(self, map_size, target_number_of_planets=10):
         self.ais = []
         self.random_generate(map_size, target_number_of_planets)
-        self.replace_planet(self.planets[-1], Planet(self.planets[-1].position, "#88DD88", routes=self.planets[0].routes))
+        self.replace_planet(self.planets[-1], Planet(self.planets[-1].position, "#88DD88", routes=self.planets[-1].routes))
         for color in self.ai_colors:
             new_planet = Planet(self.planets[0].position, color, routes=self.planets[0].routes)
             self.replace_planet(self.planets[0], new_planet)

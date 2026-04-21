@@ -27,6 +27,14 @@ class GameAi:
         if not isinstance(planet, FortPlanet) and planet.number_of_drones >= FortPlanet.cost:
             self.map.upgrade_fort(planet)
 
+    def recursive_autosend_drones(self, origin, safe_planets):
+        for neighbor_route in origin.routes:
+            neighbor_route: Route
+            neighbor = neighbor_route.get_other_planet(origin)
+            if not neighbor.autosend and neighbor in safe_planets and type(neighbor) != type(Planet): # specifically not including subclasses
+                neighbor.autosend_drones(neighbor_route)
+                self.recursive_autosend_drones(neighbor, safe_planets)
+
     def tick(self, amount):
         self.tick_count += amount
         if self.tick_count // 100 <= 0:
@@ -85,9 +93,4 @@ class GameAi:
         if len(threatened_planets) > 0:
             threatened_planets.sort(key=lambda planet: planet["enemy_drones"], reverse=True)
             most_threatened_planet = threatened_planets[0]["planet"]
-            for neighbor_route in most_threatened_planet.routes:
-                neighbor_route: Route
-                neighbor = neighbor_route.get_other_planet(most_threatened_planet)
-                print(safe_planets)
-                if neighbor in safe_planets:
-                    neighbor.autosend_drones(neighbor_route)
+            self.recursive_autosend_drones(most_threatened_planet, safe_planets)
