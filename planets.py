@@ -49,6 +49,9 @@ class Planet:
     def stop_autosend(self):
         self.autosend = None
 
+    def __eq__(self, other):
+        return self.position == other.position
+
     def tick(self, amount):
         self.tick_count += amount
 
@@ -85,20 +88,21 @@ class Planet:
                     self.visible_drones.insert(0, drone)
         else: # getting attacked
             if self.number_of_drones <= amount*self.vulnerability: # if planet gets captured
-                return Planet(self.position, drone_color, amount-(self.number_of_drones//self.vulnerability), self.routes)
+                return Planet(self.position, drone_color, int(amount-(self.number_of_drones/self.vulnerability)), self.routes)
             else:
-                self.number_of_drones -= amount*self.vulnerability
-                self.drones_defending -= amount*self.vulnerability
-                self.visible_drones = self.visible_drones[:-(amount*self.vulnerability)]
+                attack_amount = int(amount*self.vulnerability)
+                self.number_of_drones -= attack_amount
+                self.drones_defending -= attack_amount
+                self.visible_drones = self.visible_drones[:-attack_amount]
                 self.add_visible_drones(self.number_of_drones-len(self.visible_drones))
                 return None
         # self.drones_defending = max(self.drones_defending-amount*self.vulnerability, 0)
 
     def get_render_info(self):
-        if self.autosend and self.autosend.get_planets(self):
-            planets = self.autosend.get_planets(self)
-            autosend = (planets[1].position[0]-planets[0].position[0], planets[1].position[1]-planets[0].position[1])
-            distance = math.dist(planets[1].position, planets[0].position)
+        if self.autosend and self.autosend.get_other_planet(self):
+            other_planet = self.autosend.get_other_planet(self)
+            autosend = (other_planet.position[0]-self.position[0], other_planet.position[1]-self.position[1])
+            distance = math.dist(other_planet.position, self.position)
             autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         else: autosend = None
         render_info = {
@@ -121,7 +125,7 @@ class UnclaimedPlanet(Planet):
         return super().get_drones(amount, visible_drones, drone_color)
 
 class FactoryPlanet(Planet):
-    cost = 25
+    cost = 15
     def __init__(self, position, color="#555555", drones=0, routes=[]):
         super().__init__(position, color, drones, routes)
         self.ticks_per_drone = self.ticks_per_drone//2

@@ -1,9 +1,11 @@
 import pygame
 from planets import *
 from route import Route
+from gameAi import GameAi
 import random
 import math
 import multiprocessing
+
 
 class Map:
     def __init__(self):
@@ -17,6 +19,8 @@ class Map:
         self.distance_threshold = 500
         self.alert = ""
         self.alert_timer = 0
+        self.ai_colors = ["#DD8888"]
+        self.ais: list[GameAi] = []
 
     def set_alert(self, alert):
         self.alert = alert
@@ -51,7 +55,7 @@ class Map:
 
     def mousedown(self, button):
         if button == 1:
-            if self.hover and self.hover == self.active:
+            if self.hover and self.active and self.hover == self.active:
                 self.dragging = self.active
                 self.first_drag = False
             if self.hover and not self.active:
@@ -72,7 +76,7 @@ class Map:
     def mouseup(self, button):
         if button != 1:
             return
-        if not self.hover or self.hover and self.hover == self.active:
+        if not self.hover or self.hover and self.active and self.hover == self.active:
             self.dragging = None
             if not self.first_drag and self.active:
                 self.stop_autosend(self.active)
@@ -100,9 +104,15 @@ class Map:
     def replace_planet(self, origin, replacing):
         for new_route in origin.routes:
             new_route.replace_planet(origin, replacing)
-        self.planets[self.planets.index(origin)] = replacing
+        try:
+            self.planets[self.planets.index(origin)] = replacing
+        except ValueError:
+            pass
 
-    def upgrade_factory(self):
+    def upgrade_factory(self, planet: Planet):
+        self.replace_planet(planet, FactoryPlanet(planet.position, planet.color, planet.number_of_drones-FactoryPlanet.cost, planet.routes))
+
+    def user_upgrade_factory(self):
         if not self.active:
             return
         if isinstance(self.active, FactoryPlanet):
@@ -112,10 +122,13 @@ class Map:
         if self.active.number_of_drones < FactoryPlanet.cost:
             self.set_alert(f"You need {FactoryPlanet.cost} drones to upgrade")
             return
-        self.replace_planet(self.active, FactoryPlanet(self.active.position, self.active.color, self.active.number_of_drones-FactoryPlanet.cost, self.active.routes))
+        self.upgrade_factory(self.active)
         self.active = None
 
-    def upgrade_fort(self):
+    def upgrade_fort(self, planet: Planet):
+        self.replace_planet(planet, FortPlanet(planet.position, planet.color, planet.number_of_drones-FortPlanet.cost, planet.routes))
+
+    def user_upgrade_fort(self):
         if not self.active:
             return
         if isinstance(self.active, FortPlanet):
@@ -125,7 +138,7 @@ class Map:
         if self.active.number_of_drones < FortPlanet.cost:
             self.set_alert(f"You need {FortPlanet.cost} drones to upgrade")
             return
-        self.replace_planet(self.active, FortPlanet(self.active.position, self.active.color, self.active.number_of_drones-FortPlanet.cost, self.active.routes))
+        self.upgrade_fort(self.active)
         self.active = None
 
     def shuffle_planet(self, planet: Planet):
@@ -169,18 +182,25 @@ class Map:
             if not self.get_route(planet, other_planets[0]):
                 self.add_route(planet, other_planets[0])
 
-        # test
-        self.replace_planet(self.planets[0], Planet(self.planets[0].position, "#DD8888", routes=self.planets[0].routes))
+
+    def new_map(self, map_size, target_number_of_planets=10):
+        self.ais = []
+        self.random_generate(map_size, target_number_of_planets)
         self.replace_planet(self.planets[-1], Planet(self.planets[-1].position, "#88DD88", routes=self.planets[0].routes))
+        for color in self.ai_colors:
+            new_planet = Planet(self.planets[0].position, color, routes=self.planets[0].routes)
+            self.replace_planet(self.planets[0], new_planet)
+            self.ais.append(GameAi(self, [new_planet], color))
 
     def tick(self, amount):
-
         for planet in self.planets:
             planet.tick(amount)
         for route in self.routes:
             new_planets = route.tick(amount)
             if new_planets:
                 self.replace_planet(new_planets[0], new_planets[1])
+        for ai in self.ais:
+            ai.tick()
 
     def render_tick(self, timescale):
         if self.alert_timer > 0:

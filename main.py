@@ -20,7 +20,7 @@ class MainGame:
         self.paused = False
 
         self.map = Map()
-        self.map.random_generate((2000, 2000))
+        self.map.new_map((2000, 2000))
         self.ui = GameUi(self.timescale, self.paused, self.map)
         self.renderManager = RenderManager(self.map, self.ui)
 
@@ -106,10 +106,10 @@ class MainGame:
                 self.ui.set_paused(self.paused)
 
             if event.key == pygame.K_q:
-                self.map.upgrade_fort()
+                self.map.user_upgrade_fort()
 
             if event.key == pygame.K_e:
-                self.map.upgrade_factory()
+                self.map.user_upgrade_factory()
 
     def tick(self, amount=1):
         self.map.tick(amount)

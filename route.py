@@ -22,17 +22,16 @@ class Route:
         )
 
     def replace_planet(self, origin, replacing):
-
         if origin == self.planet1:
             self.planet1 = replacing
         if origin == self.planet2:
             self.planet2 = replacing
 
-    def get_planets(self, origin):
+    def get_other_planet(self, origin):
         if origin == self.planet1:
-            return self.planet1, self.planet2
+            return self.planet2
         if origin == self.planet2:
-            return self.planet2, self.planet1
+            return self.planet1
 
     def get_drones(self, amount, visible_drones: list[Drone], origin_planet: Planet):
         if origin_planet == self.planet1:
