@@ -44,6 +44,7 @@ class Route:
                 "amount": amount,
                 "visible_drones": visible_drones,
                 "color": origin_planet.color,
+                "vulnerability": origin_planet.vulnerability,
                 "reverse": False,
                 "position": self.get_pos_from_tick(0),
                 "attacking": False
@@ -55,6 +56,7 @@ class Route:
                 "amount": amount,
                 "visible_drones": visible_drones,
                 "color": origin_planet.color,
+                "vulnerability": origin_planet.vulnerability,
                 "reverse": True,
                 "position": self.get_pos_from_tick(self.ticks_distance),
                 "attacking": False
@@ -95,10 +97,10 @@ class Route:
                 # print(f"comparing {drones["ticks"]} with {other_drones["ticks"]}")
                 if drones["color"] != other_drones["color"] and drones["ticks"] >= other_drones["ticks"]-amount and drones["ticks"] <= other_drones["ticks"]+amount:
                     temp = drones["amount"]
-                    total_destroyed += min(drones["amount"], int(other_drones["amount"]))
+                    total_destroyed += min(drones["amount"], int(other_drones["amount"]*max(1, drones["vulnerability"])))
                     total_destroyed += min(other_drones["amount"], int(temp))
-                    drones["amount"] -= int(other_drones["amount"])
-                    other_drones["amount"] -= int(temp)
+                    drones["amount"] -= int(other_drones["amount"])*max(1, drones["vulnerability"])
+                    other_drones["amount"] -= int(temp)*max(1, other_drones["vulnerability"])
 
                     drones["visible_drones"] = drones["visible_drones"][:max(0, min(drones["amount"], len(drones["visible_drones"])))]
                     other_drones["visible_drones"] = other_drones["visible_drones"][:max(0, min(other_drones["amount"], len(other_drones["visible_drones"])))]

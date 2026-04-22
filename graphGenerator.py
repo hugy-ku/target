@@ -13,7 +13,7 @@ class GraphGenerator:
         return self.__graphs[self.__current_graph]()
 
     def prev_graph(self):
-        self.__current_graph = (self.__current_graph+1)%len(self.__graphs)
+        self.__current_graph = (self.__current_graph-1)%len(self.__graphs)
         return self.__graphs[self.__current_graph]()
 
     def __generate_upgrades(self):
