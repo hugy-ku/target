@@ -89,20 +89,20 @@ class Planet:
                 if len(self.visible_drones) < self.max_visible_drones:
                     drone.position = self.position
                     self.visible_drones.insert(0, drone)
-                    return None, destroyed
+            return (None, destroyed)
         else: # getting attacked
             attack_amount = math.ceil(amount*self.vulnerability)
             if self.number_of_drones <= attack_amount: # if planet gets captured
                 remaining_drones = int((attack_amount-self.number_of_drones)/self.vulnerability)
                 destroyed += self.number_of_drones + remaining_drones
-                return Planet(self.position, drone_color, remaining_drones, self.routes), destroyed
+                return (Planet(self.position, drone_color, remaining_drones, self.routes), destroyed)
             else:
                 destroyed += attack_amount + amount
                 self.number_of_drones -= attack_amount
                 self.drones_defending -= attack_amount
                 self.visible_drones = self.visible_drones[:-attack_amount]
                 self.add_visible_drones(self.number_of_drones-len(self.visible_drones))
-                return None, destroyed
+                return (None, destroyed)
         # self.drones_defending = max(self.drones_defending-amount*self.vulnerability, 0)
 
     def get_render_info(self):
