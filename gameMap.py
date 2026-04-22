@@ -182,7 +182,6 @@ class Map:
             if Route(planet, other_planets[0]) not in self.routes:
                 self.add_route(planet, other_planets[0])
 
-
     def new_map(self, map_size, target_number_of_planets=10):
         self.__init__()
         self.random_generate(map_size, target_number_of_planets)
@@ -201,6 +200,17 @@ class Map:
                 self.replace_planet(new_planets[0], new_planets[1])
         for ai in self.ais:
             ai.tick(amount)
+
+    def check_win(self):
+        colors = set()
+        for planet in self.planets:
+            if isinstance(planet, UnclaimedPlanet):
+                continue
+            colors.add(planet.color)
+        for route in self.routes:
+            for drones in route.drones:
+                colors.add(drones["color"])
+        return colors.pop() if len(colors) <= 1 else None
 
     def render_tick(self, timescale):
         if self.alert_timer > 0:

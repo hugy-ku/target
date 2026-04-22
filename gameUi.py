@@ -8,15 +8,21 @@ class GameUi:
         self.__paused = paused
         self.__map = map
         self.__menu = Menu()
+        self.__end_game = False
 
     def mousedown(self, screen: pygame.Surface, mouse_pos, mouse_button):
         mouse_pos =  (mouse_pos[0]*1000//screen.width, mouse_pos[1]*1000//screen.height)
         if not self.__menu.get_active: return
         return self.__menu.mousedown(mouse_pos, mouse_button)
 
-
     def toggle_menu(self):
         return self.__menu.toggle_active()
+
+    def new_game(self):
+        self.__end_game = False
+
+    def end_game(self):
+        self.__end_game = True
 
     def set_timescale(self, timescale):
         self.__timescale = timescale
@@ -33,7 +39,6 @@ class GameUi:
             "size": 50,
             "position": "topleft",
             "offset": (10, 10),
-            "center": True
         })
 
         if self.__map.get_active():
@@ -44,7 +49,6 @@ class GameUi:
             "size": 50,
             "position": "bottomleft",
             "offset": (10, -10),
-            "center": True
             })
 
         if self.__map.alert:
@@ -55,7 +59,16 @@ class GameUi:
             "size": 50,
             "position": "bottom",
             "offset": (0, -20),
-            "center": True
+            })
+
+        if self.__end_game:
+            info.append({
+            "type": "text",
+            "text": f"Game has ended! Press space to restart",
+            "color": "#000000",
+            "size": 75,
+            "position": "top",
+            "offset": (0, 425),
             })
 
         if self.__menu.get_active():

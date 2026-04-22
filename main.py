@@ -4,6 +4,7 @@ from gameMap import Map
 from renderManager import RenderManager
 from gameUi import GameUi
 import cProfile
+import csv
 
 class MainGame:
     def __init__(self):
@@ -19,6 +20,7 @@ class MainGame:
         self.timescale = 1
         self.paused = False
         self.ui_paused = False
+        self.game_end = False
 
         self.map = Map()
         self.map_size = (2000, 2000)
@@ -52,12 +54,22 @@ class MainGame:
                 self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
                 self.time_since_last_tick %= self.milliseconds_per_tick
                 self.map.render_tick(self.delta_time)
+                winner = self.map.check_win()
+                if winner:
+                    self.end_game(winner)
 
             self.renderManager.render(self.screen, self.delta_time)
 
             pygame.display.flip()
             self.delta_time = self.clock.tick(self.framerate)
 
+    def end_game(self, winner):
+        self.game_end = True
+        self.ui_paused = True
+        self.ui.end_game()
+        with open("statistics.csv", "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(winner)
 
     def handle_hold_inputs(self):
         if self.ui_paused:
@@ -111,6 +123,13 @@ class MainGame:
                 elif ui_event == "Exit":
                     self.running = False
 
+        if self.game_end:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.map.new_map(self.map_size)
+                self.ui_paused = False
+                self.game_end = False
+                self.ui.new_game()
+            return
 
         if event.type == pygame.KEYDOWN:
             timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
