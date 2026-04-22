@@ -70,7 +70,7 @@ class Map:
             elif button == 3:
                 self.send_drones(self.active, self.hover,0.5)
                 # not adding self.active = None here since sending half implies that you want to continue sending more
-        if not self.hover:
+        if not self.hover and button == 1:
             self.active = None
 
     def mouseup(self, button):
