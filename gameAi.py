@@ -15,7 +15,7 @@ class GameAi:
         defense_power = math.ceil((other_planet.number_of_drones+extra_drones)/other_planet.vulnerability)+1
 
         if origin.number_of_drones >= defense_power:
-            origin.send_drones(defense_power, route)
+            origin.send_drones(origin.number_of_drones, route)
             return True
         return False
 
