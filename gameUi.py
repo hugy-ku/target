@@ -20,6 +20,8 @@ class GameUi:
 
     def new_game(self):
         self.__end_game = False
+        if self.toggle_menu():
+            self.toggle_menu()
 
     def end_game(self):
         self.__end_game = True

@@ -4,7 +4,7 @@ from gameMap import Map
 from renderManager import RenderManager
 from gameUi import GameUi
 import cProfile
-import csv
+import os
 
 class MainGame:
     def __init__(self):
@@ -30,6 +30,7 @@ class MainGame:
 
         self.mouse_pos = None
         self.current_time = 0
+        self.real_time = 0
         self.time_since_last_tick = 0
 
         self.milliseconds_per_tick = 20
@@ -38,6 +39,7 @@ class MainGame:
 
     def mainloop(self):
         while self.running:
+            self.real_time += self.delta_time
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
@@ -63,13 +65,27 @@ class MainGame:
             pygame.display.flip()
             self.delta_time = self.clock.tick(self.framerate)
 
+    def new_game(self):
+        self.map.new_map(self.map_size)
+        self.ui.new_game()
+        self.current_time = 0
+        self.real_time = 0
+        self.ui_paused = False
+        self.game_end = False
+        self.paused = False
+        self.timescale = 1
+
     def end_game(self, winner):
         self.game_end = True
         self.ui_paused = True
         self.ui.end_game()
-        with open("statistics.csv", "w") as file:
-            writer = csv.writer(file)
-            writer.writerow(winner)
+        lines = []
+        if not os.path.exists("statistics.csv"):
+            lines.append(["winner", "gametime", "realtime"])
+        lines.append([winner, str(self.current_time), str(self.real_time)])
+        with open("statistics.csv", "a") as file:
+            for line in lines:
+                file.write(",".join(line)+"\n")
 
     def handle_hold_inputs(self):
         if self.ui_paused:
@@ -116,8 +132,7 @@ class MainGame:
                 elif ui_event == "Resume":
                     self.ui_paused = self.ui.toggle_menu()
                 elif ui_event == "Restart":
-                    self.map.new_map(self.map_size)
-                    self.ui_paused = self.ui.toggle_menu()
+                    self.new_game()
                 elif ui_event == "Statistics":
                     self.ui_paused = self.ui.toggle_menu()
                 elif ui_event == "Exit":
@@ -125,10 +140,7 @@ class MainGame:
 
         if self.game_end:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.map.new_map(self.map_size)
-                self.ui_paused = False
-                self.game_end = False
-                self.ui.new_game()
+                self.new_game()
             return
 
         if event.type == pygame.KEYDOWN:
