@@ -192,25 +192,36 @@ class Map:
             self.ais.append(GameAi(self, [new_planet], color))
 
     def tick(self, amount):
+        total_created = 0
+        total_destroyed = 0
         for planet in self.planets:
-            planet.tick(amount)
+            total_created += planet.tick(amount)
         for route in self.routes:
-            new_planets = route.tick(amount)
+            new_planets, destroyed = route.tick(amount)
+            total_destroyed += destroyed
             if new_planets:
                 self.replace_planet(new_planets[0], new_planets[1])
         for ai in self.ais:
             ai.tick(amount)
+        return total_created, total_destroyed
 
     def check_win(self):
         colors = set()
+        planet_upgrades = {
+            str(FactoryPlanet): 0,
+            str(FortPlanet): 0,
+            str(Planet): 0
+        }
         for planet in self.planets:
             if isinstance(planet, UnclaimedPlanet):
                 continue
             colors.add(planet.color)
+            if str(type(planet)) in planet_upgrades.keys():
+                planet_upgrades[str(type(planet))] += 1
         for route in self.routes:
             for drones in route.drones:
                 colors.add(drones["color"])
-        return colors.pop() if len(colors) <= 1 else None
+        return (colors.pop(), planet_upgrades) if len(colors) <= 1 else (None, None)
 
     def render_tick(self, timescale):
         if self.alert_timer > 0:

@@ -1,5 +1,6 @@
 import pygame
 import time
+from planets import *
 from gameMap import Map
 from renderManager import RenderManager
 from gameUi import GameUi
@@ -29,11 +30,13 @@ class MainGame:
         self.renderManager = RenderManager(self.map, self.ui)
 
         self.mouse_pos = None
+        self.time_since_last_tick = 0
+        self.milliseconds_per_tick = 20
+
         self.current_time = 0
         self.real_time = 0
-        self.time_since_last_tick = 0
-
-        self.milliseconds_per_tick = 20
+        self.drones_created = 0
+        self.drones_destroyed = 0
 
         self.mainloop()
 
@@ -53,12 +56,14 @@ class MainGame:
                 self.current_time += int(self.delta_time * self.timescale)
                 self.time_since_last_tick += int(self.delta_time * self.timescale)
 
-                self.tick(self.time_since_last_tick // self.milliseconds_per_tick)
+                created, destroyed = self.map.tick(self.time_since_last_tick // self.milliseconds_per_tick)
+                self.drones_created += created
+                self.drones_destroyed += destroyed
                 self.time_since_last_tick %= self.milliseconds_per_tick
                 self.map.render_tick(self.delta_time)
-                winner = self.map.check_win()
+                winner, planet_upgrades = self.map.check_win()
                 if winner:
-                    self.end_game(winner)
+                    self.end_game(winner, planet_upgrades)
 
             self.renderManager.render(self.screen, self.delta_time)
 
@@ -70,19 +75,21 @@ class MainGame:
         self.ui.new_game()
         self.current_time = 0
         self.real_time = 0
+        self.drones_created = 0
+        self.drones_destroyed = 0
         self.ui_paused = False
         self.game_end = False
         self.paused = False
         self.timescale = 1
 
-    def end_game(self, winner):
+    def end_game(self, winner, planet_upgrades):
         self.game_end = True
         self.ui_paused = True
         self.ui.end_game()
         lines = []
         if not os.path.exists("statistics.csv"):
-            lines.append(["winner", "gametime", "realtime"])
-        lines.append([winner, str(self.current_time), str(self.real_time)])
+            lines.append(["winner", "gametime", "realtime", "drones_created", "drones_destroyed", "factories", "forts", "unupgraded"])
+        lines.append([winner, str(self.current_time), str(self.real_time), str(self.drones_created), str(self.drones_destroyed), str(planet_upgrades[str(FactoryPlanet)]), str(planet_upgrades[str(FortPlanet)]), str(planet_upgrades[str(Planet)])])
         with open("statistics.csv", "a") as file:
             for line in lines:
                 file.write(",".join(line)+"\n")
@@ -164,10 +171,6 @@ class MainGame:
 
             if event.key == pygame.K_ESCAPE:
                 self.ui_paused = self.ui.toggle_menu()
-
-    def tick(self, amount=1):
-        self.map.tick(amount)
-
 
 if __name__ == "__main__":
     # cProfile.run("MainGame()")

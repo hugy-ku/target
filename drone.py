@@ -2,7 +2,7 @@ import random
 import math
 
 class Drone:
-    def __init__(self, position, color, offset=0, angle_offset=0, size=4):
+    def __init__(self, position, color, offset=0, angle_offset=0, size=6):
         self.color = color
         self.position = position
         self.target_position = position

@@ -63,6 +63,7 @@ class Route:
     def tick(self, amount):
         old_planet = None
         new_planet = None
+        total_destroyed = 0
         for drones in self.drones:
 
             if not drones["reverse"]:
@@ -73,7 +74,8 @@ class Route:
                     drones["attacking"] = True
                 if drones["ticks"] >= self.ticks_distance:
                     self.drones.remove(drones)
-                    new_planet = self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    new_planet, destroyed = self.planet2.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    total_destroyed += destroyed
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
             else:
                 old_planet = self.planet1
@@ -83,7 +85,8 @@ class Route:
                     drones["attacking"] = True
                 if drones["ticks"] <= 0:
                     self.drones.remove(drones)
-                    new_planet = self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    new_planet, destroyed = self.planet1.get_drones(drones["amount"], drones["visible_drones"], drones["color"])
+                    total_destroyed += destroyed
                 drones["position"] = self.get_pos_from_tick(drones["ticks"])
 
             for other_drones in self.drones:
@@ -93,7 +96,9 @@ class Route:
                 if drones["color"] != other_drones["color"] and drones["ticks"] >= other_drones["ticks"]-amount and drones["ticks"] <= other_drones["ticks"]+amount:
                     temp = drones["amount"]
                     drones["amount"] -= int(other_drones["amount"])
+                    total_destroyed += min(drones["amount"], int(other_drones["amount"]))
                     other_drones["amount"] -= int(temp)
+                    total_destroyed += min(other_drones["amount"], int(temp))
 
                     drones["visible_drones"] = drones["visible_drones"][:max(0, min(drones["amount"], len(drones["visible_drones"])))]
                     other_drones["visible_drones"] = other_drones["visible_drones"][:max(0, min(other_drones["amount"], len(other_drones["visible_drones"])))]
@@ -115,7 +120,7 @@ class Route:
                     drones["position"][1] + 100*((drone.offset)*math.sin(drone.angle_offset))
                 ))
 
-        return (old_planet, new_planet) if new_planet and old_planet else None
+        return ((old_planet, new_planet), total_destroyed) if new_planet and old_planet else (None, total_destroyed)
 
     def render_tick(self, timescale):
         for drones in self.drones:
