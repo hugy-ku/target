@@ -11,9 +11,10 @@ class GameUi:
         self.__end_game = False
 
     def mousedown(self, screen: pygame.Surface, mouse_pos, mouse_button):
-        mouse_pos =  (mouse_pos[0]*1000//screen.width, mouse_pos[1]*1000//screen.height)
+        scale_amount = screen.height/1000
+        mouse_pos =  (mouse_pos[0]//scale_amount, mouse_pos[1]//scale_amount)
         if not self.__menu.get_active: return
-        return self.__menu.mousedown(mouse_pos, mouse_button)
+        return self.__menu.mousedown(screen, mouse_pos, mouse_button)
 
     def toggle_menu(self):
         return self.__menu.toggle_active()
@@ -79,7 +80,7 @@ class GameUi:
         return info
 
 class Button:
-    def __init__(self, position, size, color, text, text_position, text_size, text_color):
+    def __init__(self, position, size, color, text, text_position, text_size, text_color, anchor):
         self.position = position
         self.size = size
         self.color = color
@@ -87,6 +88,7 @@ class Button:
         self.text_position = text_position
         self.text_size = text_size
         self.text_color = text_color
+        self.anchor = anchor
 
         self.__rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
 
@@ -98,9 +100,9 @@ class Menu:
         self.__active = False
         self.__buttons: list[Button] = []
 
-        buttons_padding = (375, 200)
+        buttons_padding = (0, 200)
         for text in ["Resume", "Restart", "Statistics", "Exit"]:
-            self.__buttons.append(Button(buttons_padding, (250,100), "#666666", text, (buttons_padding[0]+125,buttons_padding[1]+25), 75, "#DDDDDD"))
+            self.__buttons.append(Button(buttons_padding, (250,100), "#666666", text, (buttons_padding[0],buttons_padding[1]+25), 75, "#DDDDDD", "top"))
             buttons_padding = (buttons_padding[0], buttons_padding[1]+150)
 
     def get_active(self):
@@ -110,11 +112,17 @@ class Menu:
         self.__active = not self.__active
         return self.__active
 
-    def mousedown(self, mouse_pos, mouse_button):
+    def mousedown(self, screen, mouse_pos, mouse_button):
         if mouse_button != 1:
             return
+
+        width_size = 1000*screen.width/screen.height
+        height_size = 1000*screen.width/screen.height
+
         for button in self.__buttons:
-            if button.in_button(mouse_pos):
+            if button.anchor == "top":
+                new_mouse_pos = (mouse_pos[0]-(width_size-button.size[0])//2, mouse_pos[1])
+            if button.in_button(new_mouse_pos):
                 return button.text
 
 
@@ -127,16 +135,16 @@ class Menu:
                 "type": "rect",
                 "size": button.size,
                 "color": button.color,
-                "position": "top",
-                "offset": (0, button.position[1])
+                "position": button.anchor,
+                "offset": (button.position[0], button.position[1])
             })
             info.append({
                 "type": "text",
                 "text": button.text,
                 "size": button.text_size,
                 "color": button.text_color,
-                "position": "top",
-                "offset": (0, button.text_position[1]),
+                "position": button.anchor,
+                "offset": (button.text_position[0], button.text_position[1]),
                 "center": False
             })
 

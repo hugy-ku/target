@@ -142,18 +142,18 @@ class RenderManager:
 
         for ui_info in ui_infos:
             if ui_info["type"] == "text":
-                font = pygame.font.Font(None, int(ui_info["size"]))
+                font = pygame.font.Font(None, int(ui_info["size"]*scale_amount))
                 size = font.size(ui_info["text"])
                 size = (size[0], size[1]*(ui_info["text"].count("\n")+1))
             elif ui_info["type"] == "rect":
-                size = ui_info["size"]
+                size = (ui_info["size"][0]*scale_amount, ui_info["size"][1]*scale_amount)
 
 
             if ui_info["position"] == "topleft":
                 position = [0, 0]
             elif ui_info["position"] == "top":
                 position = [screen.width//2, 0]
-                position[0] -= size[0]//2*scale_amount
+                position[0] -= size[0]//2
             elif ui_info["position"] == "topright":
                 position = [screen.width, 0]
                 position[0] -= size[0]
@@ -178,7 +178,6 @@ class RenderManager:
             position[1] += ui_info["offset"][1] * scale_amount
 
             if ui_info["type"] == "text":
-                font = pygame.font.Font(None, int(ui_info["size"]*scale_amount))
                 screen.blit(font.render(ui_info["text"], False, ui_info["color"]), position)
             if ui_info["type"] == "rect":
-                pygame.draw.rect(screen, ui_info["color"], pygame.Rect(position[0], position[1], size[0]*scale_amount, size[1]*scale_amount))
+                pygame.draw.rect(screen, ui_info["color"], pygame.Rect(position[0], position[1], size[0], size[1]))
