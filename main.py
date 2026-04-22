@@ -18,6 +18,7 @@ class MainGame:
 
         self.timescale = 1
         self.paused = False
+        self.ui_paused = False
 
         self.map = Map()
         self.map.new_map((2000, 2000))
@@ -42,7 +43,7 @@ class MainGame:
                     self.running = False
                 self.handle_input(event)
 
-            if not self.paused:
+            if not self.paused and not self.ui_paused:
                 # convert to int in case timescale < 1 and it divides
                 self.current_time += int(self.delta_time * self.timescale)
                 self.time_since_last_tick += int(self.delta_time * self.timescale)
@@ -58,6 +59,9 @@ class MainGame:
 
 
     def handle_hold_inputs(self):
+        if self.ui_paused:
+            return
+
         pressed = pygame.key.get_pressed()
 
         speed_mod = 1
@@ -80,16 +84,25 @@ class MainGame:
 
     def handle_input(self, event: pygame.event.Event):
 
-        if event.type == pygame.MOUSEWHEEL:
-            self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
         if event.type == pygame.MOUSEMOTION:
             self.mouse_pos = event.pos
         if event.type == pygame.WINDOWLEAVE:
             self.mouse_pos = None
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.map.mousedown(event.button)
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.map.mouseup(event.button)
+        if not self.ui_paused:
+            if event.type == pygame.MOUSEWHEEL:
+                self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.map.mousedown(event.button)
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.map.mouseup(event.button)
+        if self.ui_paused:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                ui_event = self.ui.mousedown(self.screen, self.mouse_pos, event.button)
+                if not ui_event:
+                    pass
+                elif ui_event == "Resume":
+                    self.ui_paused = self.ui.toggle_menu()
+
 
         if event.type == pygame.KEYDOWN:
             timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
@@ -111,7 +124,7 @@ class MainGame:
                 self.map.user_upgrade_factory()
 
             if event.key == pygame.K_ESCAPE:
-                self.ui.toggle_menu()
+                self.ui_paused = self.ui.toggle_menu()
 
     def tick(self, amount=1):
         self.map.tick(amount)
