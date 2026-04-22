@@ -21,7 +21,8 @@ class MainGame:
         self.ui_paused = False
 
         self.map = Map()
-        self.map.new_map((2000, 2000))
+        self.map_size = (2000, 2000)
+        self.map.new_map(self.map_size)
         self.ui = GameUi(self.timescale, self.paused, self.map)
         self.renderManager = RenderManager(self.map, self.ui)
 
@@ -102,6 +103,13 @@ class MainGame:
                     pass
                 elif ui_event == "Resume":
                     self.ui_paused = self.ui.toggle_menu()
+                elif ui_event == "Restart":
+                    self.map.new_map(self.map_size)
+                    self.ui_paused = self.ui.toggle_menu()
+                elif ui_event == "Statistics":
+                    self.ui_paused = self.ui.toggle_menu()
+                elif ui_event == "Exit":
+                    self.running = False
 
 
         if event.type == pygame.KEYDOWN:
