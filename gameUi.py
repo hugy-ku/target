@@ -8,21 +8,31 @@ class GameUi:
         self.__paused = paused
         self.__map = map
         self.__menu = Menu()
+        self.__statistics_menu = StatisticsMenu()
         self.__end_game = False
 
     def mousedown(self, screen: pygame.Surface, mouse_pos, mouse_button):
         scale_amount = screen.height/1000
         mouse_pos =  (mouse_pos[0]//scale_amount, mouse_pos[1]//scale_amount)
-        if not self.__menu.get_active: return
-        return self.__menu.mousedown(screen, mouse_pos, mouse_button)
+        if self.__statistics_menu.get_active():
+            return
+        elif self.__menu.get_active():
+            return self.__menu.mousedown(screen, mouse_pos, mouse_button)
 
-    def toggle_menu(self):
-        return self.__menu.toggle_active()
+    def handle_escape(self):
+        if self.__statistics_menu.get_active():
+            self.__statistics_menu.toggle_active()
+            return True
+        else:
+            return self.__menu.toggle_active()
+
+    def toggle_statistics_menu(self):
+        return self.__statistics_menu.toggle_active()
 
     def new_game(self):
         self.__end_game = False
-        if self.toggle_menu():
-            self.toggle_menu()
+        if self.__menu.get_active():
+            self.__menu.toggle_active()
 
     def end_game(self):
         self.__end_game = True
@@ -77,6 +87,9 @@ class GameUi:
         if self.__menu.get_active():
             info.extend(self.__menu.get_render_info())
 
+        if self.__statistics_menu.get_active():
+            info.extend(self.__statistics_menu.get_render_info())
+
         return info
 
 class Button:
@@ -117,7 +130,6 @@ class Menu:
             return
 
         width_size = 1000*screen.width/screen.height
-        height_size = 1000*screen.width/screen.height
 
         for button in self.__buttons:
             if button.anchor == "top":
@@ -145,7 +157,43 @@ class Menu:
                 "color": button.text_color,
                 "position": button.anchor,
                 "offset": (button.text_position[0], button.text_position[1]),
-                "center": False
             })
+
+        return info
+
+class StatisticsMenu:
+    def __init__(self):
+        self.__active = False
+        self.selected = 0
+
+    def get_active(self):
+        return self.__active
+
+    def toggle_active(self):
+        self.__active = not self.__active
+        return self.__active
+
+    def mousedown(self, mouse_pos, button):
+        pass
+
+    def get_render_info(self):
+        info = []
+
+        info.append({
+            "type": "text",
+            "text": "testeted",
+            "size": 75,
+            "color": "#000000",
+            "position": "top",
+            "offset": (0, 25)
+        })
+
+        info.append({
+            "type": "rect",
+            "size": (800, 800),
+            "color": "#333333",
+            "position": "top",
+            "offset": (0, 100)
+        })
 
         return info

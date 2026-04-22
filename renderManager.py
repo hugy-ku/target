@@ -178,6 +178,6 @@ class RenderManager:
             position[1] += ui_info["offset"][1] * scale_amount
 
             if ui_info["type"] == "text":
-                screen.blit(font.render(ui_info["text"], False, ui_info["color"]), position)
+                screen.blit(font.render(ui_info["text"], True, ui_info["color"]), position)
             if ui_info["type"] == "rect":
                 pygame.draw.rect(screen, ui_info["color"], pygame.Rect(position[0], position[1], size[0], size[1]))

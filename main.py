@@ -124,6 +124,28 @@ class MainGame:
             self.mouse_pos = event.pos
         if event.type == pygame.WINDOWLEAVE:
             self.mouse_pos = None
+
+        if self.game_end:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                self.new_game()
+            return
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.ui_paused = self.ui.handle_escape()
+        if self.ui_paused:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                ui_event = self.ui.mousedown(self.screen, self.mouse_pos, event.button)
+                if not ui_event:
+                    pass
+                elif ui_event == "Resume":
+                    self.ui_paused = self.ui.handle_escape()
+                elif ui_event == "Restart":
+                    self.new_game()
+                elif ui_event == "Statistics":
+                    self.ui_paused = self.ui.toggle_statistics_menu()
+                elif ui_event == "Exit":
+                    self.running = False
+
         if not self.ui_paused:
             if event.type == pygame.MOUSEWHEEL:
                 self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())
@@ -131,46 +153,26 @@ class MainGame:
                 self.map.mousedown(event.button)
             if event.type == pygame.MOUSEBUTTONUP:
                 self.map.mouseup(event.button)
-        if self.ui_paused:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                ui_event = self.ui.mousedown(self.screen, self.mouse_pos, event.button)
-                if not ui_event:
-                    pass
-                elif ui_event == "Resume":
-                    self.ui_paused = self.ui.toggle_menu()
-                elif ui_event == "Restart":
-                    self.new_game()
-                elif ui_event == "Statistics":
-                    self.ui_paused = self.ui.toggle_menu()
-                elif ui_event == "Exit":
-                    self.running = False
 
-        if self.game_end:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.new_game()
-            return
+            if event.type == pygame.KEYDOWN:
+                timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
+                if event.key in timescales:
+                    timescale = int(event.unicode)
+                    self.timescale = 2**(timescale-1) # starts from 2^0 (or 1)
+                    self.paused = False
+                    self.ui.set_paused(self.paused)
+                    self.ui.set_timescale(timescale)
 
-        if event.type == pygame.KEYDOWN:
-            timescales = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]
-            if event.key in timescales:
-                timescale = int(event.unicode)
-                self.timescale = 2**(timescale-1) # starts from 2^0 (or 1)
-                self.paused = False
-                self.ui.set_paused(self.paused)
-                self.ui.set_timescale(timescale)
+                if event.key == pygame.K_SPACE:
+                    self.paused = not self.paused
+                    self.ui.set_paused(self.paused)
 
-            if event.key == pygame.K_SPACE:
-                self.paused = not self.paused
-                self.ui.set_paused(self.paused)
+                if event.key == pygame.K_q:
+                    self.map.user_upgrade_fort()
 
-            if event.key == pygame.K_q:
-                self.map.user_upgrade_fort()
+                if event.key == pygame.K_e:
+                    self.map.user_upgrade_factory()
 
-            if event.key == pygame.K_e:
-                self.map.user_upgrade_factory()
-
-            if event.key == pygame.K_ESCAPE:
-                self.ui_paused = self.ui.toggle_menu()
 
 if __name__ == "__main__":
     # cProfile.run("MainGame()")
