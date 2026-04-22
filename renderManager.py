@@ -138,7 +138,7 @@ class RenderManager:
 
         # UI rendering
 
-    def render_ui(self, screen, ui_infos, scale_amount):
+    def render_ui(self, screen: pygame.Surface, ui_infos, scale_amount):
 
         for ui_info in ui_infos:
             if ui_info["type"] == "text":
@@ -147,6 +147,10 @@ class RenderManager:
                 size = (size[0], size[1]*(ui_info["text"].count("\n")+1))
             elif ui_info["type"] == "rect":
                 size = (ui_info["size"][0]*scale_amount, ui_info["size"][1]*scale_amount)
+            elif ui_info["type"] == "surface":
+                surface: pygame.Surface = ui_info["surface"]
+                surface = pygame.transform.scale_by(surface, scale_amount)
+                size = surface.get_size()
 
 
             if ui_info["position"] == "topleft":
@@ -181,3 +185,5 @@ class RenderManager:
                 screen.blit(font.render(ui_info["text"], True, ui_info["color"]), position)
             if ui_info["type"] == "rect":
                 pygame.draw.rect(screen, ui_info["color"], pygame.Rect(position[0], position[1], size[0], size[1]))
+            if ui_info["type"] == "surface":
+                screen.blit(surface, position)

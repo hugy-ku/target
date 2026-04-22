@@ -1,6 +1,7 @@
 from gameMap import Map
 from planets import *
 import pygame
+from graphGenerator import GraphGenerator
 
 class GameUi:
     def __init__(self, timescale, paused, map: Map):
@@ -164,7 +165,8 @@ class Menu:
 class StatisticsMenu:
     def __init__(self):
         self.__active = False
-        self.selected = 0
+        self.__graph_generator = GraphGenerator()
+        self.next_graph()
 
     def get_active(self):
         return self.__active
@@ -173,15 +175,17 @@ class StatisticsMenu:
         self.__active = not self.__active
         return self.__active
 
-    def mousedown(self, mouse_pos, button):
-        pass
+    def next_graph(self):
+        filename = self.__graph_generator.next_graph()
+        self.__current_graph = pygame.image.load(filename)
+        self.__current_graph = pygame.transform.scale(self.__current_graph, (800, 800))
 
     def get_render_info(self):
         info = []
 
         info.append({
             "type": "text",
-            "text": "testeted",
+            "text": "placeholder",
             "size": 75,
             "color": "#000000",
             "position": "top",
@@ -189,9 +193,8 @@ class StatisticsMenu:
         })
 
         info.append({
-            "type": "rect",
-            "size": (800, 800),
-            "color": "#333333",
+            "type": "surface",
+            "surface": self.__current_graph,
             "position": "top",
             "offset": (0, 100)
         })
