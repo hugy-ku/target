@@ -4,10 +4,10 @@ from planets import *
 from drone import Drone
 
 class Route:
-    def __init__(self, planet1: Planet, planet2: Planet, size=100):
+    def __init__(self, planet1: Planet, planet2: Planet):
         self.planet1 = planet1
         self.planet2 = planet2
-        self.size = size
+        self.size = 50
         self.drones = []
         # heavenly code
         x1 = min(self.planet1.position[0]-self.planet1.size, self.planet2.position[0]-self.planet2.size)

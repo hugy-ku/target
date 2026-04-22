@@ -91,6 +91,7 @@ class GameAi:
                 })
 
         if len(threatened_planets) > 0:
-            threatened_planets.sort(key=lambda planet: planet["enemy_drones"], reverse=True)
-            most_threatened_planet = threatened_planets[0]["planet"]
-            self.recursive_autosend_drones(most_threatened_planet, safe_planets)
+            threatened_planets.sort(key=lambda planet: planet["enemy_drones"])
+            for threatened_planet_info in threatened_planets:
+                threatened_planet = threatened_planet_info["planet"]
+                self.recursive_autosend_drones(threatened_planet, safe_planets)

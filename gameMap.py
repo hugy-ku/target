@@ -31,8 +31,8 @@ class Map:
         self.planets.append(planet)
         return planet
 
-    def add_route(self, planet1: Planet, planet2: Planet, size=100):
-        route = Route(planet1, planet2, size)
+    def add_route(self, planet1: Planet, planet2: Planet):
+        route = Route(planet1, planet2)
         planet1.add_route(route)
         planet2.add_route(route) # me desperately trying and failing to turn a directed graph into and undirected graph
         self.routes.append(route)

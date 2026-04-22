@@ -23,7 +23,7 @@ class GameUi:
             "type": "text",
             "text": f"{">"*self.__timescale if not self.__paused else 'paused'}",
             "color": "#000000",
-            "size": 100,
+            "size": 50,
             "position": "topleft",
             "offset": (10, 10)
         })
@@ -33,7 +33,7 @@ class GameUi:
             "type": "text",
             "text": f"Q - Turret Upgrade (10 Drones)\nE - Factory Upgrade ({FactoryPlanet.cost} Drones)",
             "color": "#000000",
-            "size": 75,
+            "size": 50,
             "position": "bottomleft",
             "offset": (10, -10)
             })
@@ -43,7 +43,7 @@ class GameUi:
             "type": "text",
             "text": self.__map.alert,
             "color": "#BB0000",
-            "size": 100,
+            "size": 50,
             "position": "bottom",
             "offset": (0, -20)
             })
@@ -67,10 +67,18 @@ class Menu:
         info = []
         info.append({
             "type": "rect",
-            "size": (1000,1000),
+            "size": (450,450),
             "color": "#555555",
             "position": "top",
             "offset": (0,0)
+        })
+
+        info.append({
+            "type": "rect",
+            "size": (450,450),
+            "color": "#555555",
+            "position": "top",
+            "offset": (0,500)
         })
 
         return info

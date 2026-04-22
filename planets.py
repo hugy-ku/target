@@ -7,7 +7,7 @@ class Planet:
     cost = 0
     def __init__(self, position: tuple[int, int], color="#555555", drones=0, routes=[]):
         self.position = position
-        self.size = 100
+        self.size = 50
         self.color = color
         self.rect = pygame.Rect(self.position[0]-self.size, self.position[1]-self.size, 2*self.size, 2*self.size)
         self.routes: list = routes[:]
@@ -19,7 +19,7 @@ class Planet:
         self.ticks_per_orbit = 1000
         self.ticks_since_last_drone = 0
         self.angle_per_tick = (2*math.pi)/self.ticks_per_orbit
-        self.orbit_distance = self.size*1.5
+        self.orbit_distance = self.size*3
         self.drones_defending = 0 # purely visual dw about it too much
 
         self.visible_drones: list[Drone] = []
