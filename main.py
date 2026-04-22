@@ -146,6 +146,9 @@ class MainGame:
                 elif ui_event == "Exit":
                     self.running = False
 
+            if event.type == pygame.KEYDOWN:
+                self.ui.handle_keydown(event.key)
+
         if not self.ui_paused:
             if event.type == pygame.MOUSEWHEEL:
                 self.renderManager.change_zoom(event.y*0.05, pygame.mouse.get_pos())

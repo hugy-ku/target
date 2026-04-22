@@ -27,6 +27,14 @@ class GameUi:
         else:
             return self.__menu.toggle_active()
 
+    def handle_keydown(self, key):
+        if not self.__statistics_menu.get_active():
+            return
+        if key == pygame.K_q:
+            self.__statistics_menu.prev_graph()
+        if key == pygame.K_e:
+            self.__statistics_menu.next_graph()
+
     def toggle_statistics_menu(self):
         return self.__statistics_menu.toggle_active()
 
@@ -178,14 +186,19 @@ class StatisticsMenu:
     def next_graph(self):
         filename = self.__graph_generator.next_graph()
         self.__current_graph = pygame.image.load(filename)
-        self.__current_graph = pygame.transform.scale(self.__current_graph, (800, 800))
+        self.__current_graph = pygame.transform.smoothscale(self.__current_graph, (800, 800))
+
+    def prev_graph(self):
+        filename = self.__graph_generator.prev_graph()
+        self.__current_graph = pygame.image.load(filename)
+        self.__current_graph = pygame.transform.smoothscale(self.__current_graph, (800, 800))
 
     def get_render_info(self):
         info = []
 
         info.append({
             "type": "text",
-            "text": "placeholder",
+            "text": "Q <-  Switch Graphs  -> E",
             "size": 75,
             "color": "#000000",
             "position": "top",
