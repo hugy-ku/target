@@ -31,7 +31,7 @@ class GameAi:
         for neighbor_route in origin.routes:
             neighbor_route: Route
             neighbor = neighbor_route.get_other_planet(origin)
-            if not neighbor.autosend and neighbor in safe_planets and type(neighbor) != type(Planet): # specifically not including subclasses
+            if not neighbor.autosend and neighbor in safe_planets and type(neighbor) != Planet: # specifically not including subclasses
                 neighbor.autosend_drones(neighbor_route)
                 self.recursive_autosend_drones(neighbor, safe_planets)
 

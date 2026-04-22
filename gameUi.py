@@ -6,6 +6,10 @@ class GameUi:
         self.__timescale = timescale
         self.__paused = paused
         self.__map = map
+        self.__menu = Menu()
+
+    def toggle_menu(self):
+        self.__menu.toggle_active()
 
     def set_timescale(self, timescale):
         self.__timescale = timescale
@@ -43,5 +47,30 @@ class GameUi:
             "position": "bottom",
             "offset": (0, -20)
             })
+
+        if self.__menu.get_active():
+            info.extend(self.__menu.get_render_info())
+
+        return info
+
+class Menu:
+    def __init__(self):
+        self.__active = False
+
+    def get_active(self):
+        return self.__active
+
+    def toggle_active(self):
+        self.__active = not self.__active
+
+    def get_render_info(self):
+        info = []
+        info.append({
+            "type": "rect",
+            "size": (1000,1000),
+            "color": "#555555",
+            "position": "top",
+            "offset": (0,0)
+        })
 
         return info

@@ -110,6 +110,9 @@ class MainGame:
             if event.key == pygame.K_e:
                 self.map.user_upgrade_factory()
 
+            if event.key == pygame.K_ESCAPE:
+                self.ui.toggle_menu()
+
     def tick(self, amount=1):
         self.map.tick(amount)
 
