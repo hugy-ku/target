@@ -182,7 +182,7 @@ class Map:
             if Route(planet, other_planets[0]) not in self.routes:
                 self.add_route(planet, other_planets[0])
 
-    def new_map(self, map_size, target_number_of_planets=10):
+    def new_map(self, map_size, target_number_of_planets=15):
         self.__init__()
         self.random_generate(map_size, target_number_of_planets)
         self.replace_planet(self.planets[-1], Planet(self.planets[-1].position, "#88DD88", routes=self.planets[-1].routes))
