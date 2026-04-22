@@ -58,7 +58,7 @@ class Map:
             if self.hover and self.active and self.hover == self.active:
                 self.dragging = self.active
                 self.first_drag = False
-            if self.hover and not self.active:
+            if self.hover and not self.active and self.hover.color == "#88DD88":
                 self.active = self.hover
                 self.dragging = self.active
                 self.first_drag = True
