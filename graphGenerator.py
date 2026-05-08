@@ -2,12 +2,14 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import math
+from pathlib import Path
 
 class GraphGenerator:
     def __init__(self):
         self.__graphs = [self.__generate_upgrades, self.__generate_times, self.__generate_drones, self.__generate_table]
         self.__current_graph = -1 #-1 so next graph would be 0th
         self.__figsize = (7,7)
+        self.__file_prefix = Path().cwd() / "screenshots" / "visualization"
         self.__get_data()
 
     def __get_data(self):
@@ -43,7 +45,7 @@ class GraphGenerator:
         fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
         plt.pie([unupgraded, factories, forts], labels=["Unupgraded", "Factories", "Forts"], autopct="%1.1f%%", colors=["#777777", "#66DD66", "#6666DD"])
         plt.title("Proportion of planet upgrades")
-        plt.savefig(filename)
+        plt.savefig(self.__file_prefix / filename)
         plt.close()
         return filename
 
@@ -55,7 +57,7 @@ class GraphGenerator:
         plt.title("Relation between in-game and real time")
         plt.xlabel("Real time (seconds)")
         plt.ylabel("In-game time (seconds)")
-        plt.savefig(filename)
+        plt.savefig(self.__file_prefix / filename)
         plt.close()
         return filename
 
@@ -83,7 +85,7 @@ class GraphGenerator:
         plt.xlabel("Total number of drones")
         plt.ylabel("Percentage")
         plt.legend()
-        plt.savefig(filename)
+        plt.savefig(self.__file_prefix / filename)
         plt.close()
         return filename
 
@@ -167,7 +169,6 @@ class GraphGenerator:
         pd.plotting.table(ax1, df_summary1, loc="center", cellLoc="center")
         pd.plotting.table(ax2, df_summary2, loc="center", cellLoc="center")
         pd.plotting.table(ax3, df_summary3, loc="center", cellLoc="center")
-
-        plt.savefig(filename)
+        plt.savefig(self.__file_prefix / filename)
         plt.close()
         return filename

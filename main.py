@@ -42,7 +42,8 @@ class MainGame:
 
     def mainloop(self):
         while self.running:
-            self.real_time += self.delta_time
+            if not self.ui_paused:
+                self.real_time += self.delta_time
             self.handle_hold_inputs()
 
             for event in pygame.event.get():
@@ -179,4 +180,5 @@ class MainGame:
 
 if __name__ == "__main__":
     # cProfile.run("MainGame()")
+    os.chdir(os.path.realpath(os.path.dirname(__name__)))
     game = MainGame()
