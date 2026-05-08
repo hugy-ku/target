@@ -37,7 +37,7 @@ class GraphGenerator:
         return self.__graphs[self.__current_graph]()
 
     def __generate_upgrades(self):
-        filename = "fig_upgrades.png"
+        filename = self.__file_prefix / "fig_upgrades.png"
         unupgraded = self.__data["unupgraded"].sum()
         factories = self.__data["factories"].sum()
         forts = self.__data["forts"].sum()
@@ -45,24 +45,24 @@ class GraphGenerator:
         fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
         plt.pie([unupgraded, factories, forts], labels=["Unupgraded", "Factories", "Forts"], autopct="%1.1f%%", colors=["#777777", "#66DD66", "#6666DD"])
         plt.title("Proportion of planet upgrades")
-        plt.savefig(self.__file_prefix / filename)
+        plt.savefig(filename)
         plt.close()
         return filename
 
     def __generate_times(self):
-        filename = "fig_times.png"
+        filename = self.__file_prefix / "fig_times.png"
 
         fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
         plt.scatter(self.__data["realtime"]/1000, self.__data["gametime"]/1000)
         plt.title("Relation between in-game and real time")
         plt.xlabel("Real time (seconds)")
         plt.ylabel("In-game time (seconds)")
-        plt.savefig(self.__file_prefix / filename)
+        plt.savefig(filename)
         plt.close()
         return filename
 
     def __generate_drones(self):
-        filename = "fig_drones.png"
+        filename = self.__file_prefix / "fig_drones.png"
         fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
 
         bin_size = 250
@@ -85,12 +85,12 @@ class GraphGenerator:
         plt.xlabel("Total number of drones")
         plt.ylabel("Percentage")
         plt.legend()
-        plt.savefig(self.__file_prefix / filename)
+        plt.savefig(filename)
         plt.close()
         return filename
 
     def __generate_table(self):
-        filename = "fig_table.png"
+        filename = self.__file_prefix / "fig_table.png"
         fig, (ax1, ax2, ax3) = plt.subplots(figsize=self.__figsize, dpi=300, nrows=3)
         ax1.axis("off")
         ax2.axis("off")
@@ -169,6 +169,7 @@ class GraphGenerator:
         pd.plotting.table(ax1, df_summary1, loc="center", cellLoc="center")
         pd.plotting.table(ax2, df_summary2, loc="center", cellLoc="center")
         pd.plotting.table(ax3, df_summary3, loc="center", cellLoc="center")
-        plt.savefig(self.__file_prefix / filename)
+        fig.suptitle("Table of Game Overall")
+        plt.savefig(filename)
         plt.close()
         return filename
