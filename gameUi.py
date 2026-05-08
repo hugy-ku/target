@@ -42,6 +42,7 @@ class GameUi:
         self.__end_game = False
         if self.__menu.get_active():
             self.__menu.toggle_active()
+        self.__timescale = 1
 
     def end_game(self):
         self.__end_game = True
@@ -174,22 +175,30 @@ class StatisticsMenu:
     def __init__(self):
         self.__active = False
         self.__graph_generator = GraphGenerator()
-        self.next_graph()
+        self.__current_graph = None
 
     def get_active(self):
         return self.__active
 
     def toggle_active(self):
         self.__active = not self.__active
+        if not self.__graph_generator:
+            self = self.__graph_generator
+        if self.__graph_generator and not self.__current_graph:
+            self.next_graph()
         return self.__active
 
     def next_graph(self):
+        if not self.__graph_generator: return
         filename = self.__graph_generator.next_graph()
+        if not filename: return
         self.__current_graph = pygame.image.load(filename)
         self.__current_graph = pygame.transform.smoothscale(self.__current_graph, (800, 800))
 
     def prev_graph(self):
+        if not self.__graph_generator: return
         filename = self.__graph_generator.prev_graph()
+        if not filename: return
         self.__current_graph = pygame.image.load(filename)
         self.__current_graph = pygame.transform.smoothscale(self.__current_graph, (800, 800))
 
@@ -205,11 +214,12 @@ class StatisticsMenu:
             "offset": (0, 25)
         })
 
-        info.append({
-            "type": "surface",
-            "surface": self.__current_graph,
-            "position": "top",
-            "offset": (0, 100)
-        })
+        if self.__current_graph:
+            info.append({
+                "type": "surface",
+                "surface": self.__current_graph,
+                "position": "top",
+                "offset": (0, 100)
+            })
 
         return info
