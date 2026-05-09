@@ -184,7 +184,7 @@ class Map:
         for color in self.ai_colors:
             new_planet = Planet(self.planets[0].position, color, routes=self.planets[0].routes)
             self.replace_planet(self.planets[0], new_planet)
-            self.ais.append(GameAi(self, [new_planet], color))
+            self.ais.append(GameAi(self, color))
 
     def tick(self, amount):
         total_created = 0

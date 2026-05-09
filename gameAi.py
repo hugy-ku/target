@@ -2,7 +2,7 @@ from planets import *
 from route import Route
 
 class GameAi:
-    def __init__(self, map, planets=[], color="#DD8888"):
+    def __init__(self, map, color="#DD8888"):
         self.color = color
         self.map = map
         self.tick_count = 0
