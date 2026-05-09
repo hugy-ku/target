@@ -6,8 +6,8 @@
 - **Brief Description:**  
   A 2D top-down real time strategy game about capturing planets. The game contains a map, consisting of circular planets and routes that connect them together. You start as the green faction, with one claimed planet. Claimed planets construct drones over time. These drones can be sent over to other planets through the routes to capture planets. Opposing drones destroy each other, whether on routes or defending their planet. If attackers win, the planet gets captured, otherwise, the defenders keep their planet. Planets have two mutually exclusive upgrades: Factories and forts. Factories produce double the drones, but their drones defend less effectively. Drones in forts defend twice as effectively, with no other downside. Upgrade cost varies between upgrades.
 - **Problem Statement:**  
-  The game this project is based on, Opacha-mda, refers to drones as power. They represent sending power through planets as a circle with a number in the middle. It was necessary to do this as it is limited in performance due to it being a mobile game, but this project doesn't have that kind of problem since it is meant to be run on a computer. I decided to turn power into drones, to turn it from "looking at numbers go up" to "looking at planets' orbits filling up with the might of a thousand* drones".
-  *real game limits visible drones to 200 per planet for performance reasons
+  The game this project is based on, Opacha-mda, refers to drones as power. They represent sending power through planets as a circle with a number in the middle. It was necessary to do this as it is limited in performance due to it being a mobile game, but this project doesn't have that kind of problem since it is meant to be run on a computer. I decided to turn power into drones, to turn it from "looking at numbers go up" to "looking at planets' orbits filling up with the might of a thousand* drones".  
+  <small>*real game limits visible drones to 200 per planet for performance reasons</small>
 
 - **Target Users:**  
   Anyone who reads the controls in README.md
@@ -20,6 +20,19 @@
   - Random map generation! Every game is different!
   - Supports every frame rate and resolution!
   - Enemy AI! (the non-generative kind)
+
+- **Screenshots:**
+  - ![image_1](screenshots/gameplay/2.png)
+  - ![image_2](screenshots/gameplay/3.png)
+  - ![image_3](screenshots/gameplay/4.png)
+  - ![image_4](screenshots/gameplay/5.png)
+  - ![image_5](screenshots/gameplay/6.png)
+
+- **Proposal**
+  - [Proposal PDF](proposal.pdf)
+
+- **Youtube Video**
+  - placeholder
 
 ## 2. Concept
 
