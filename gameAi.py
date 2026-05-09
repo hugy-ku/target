@@ -31,15 +31,15 @@ class GameAi:
         for neighbor_route in origin.routes:
             neighbor_route: Route
             neighbor = neighbor_route.get_other_planet(origin)
-            if not neighbor.autosend and neighbor in safe_planets and type(neighbor) != Planet: # specifically not including subclasses
+            if not neighbor.autosend and neighbor in safe_planets:
                 neighbor.autosend_drones(neighbor_route)
                 self.recursive_autosend_drones(neighbor, safe_planets)
 
     def tick(self, amount):
         self.tick_count += amount
-        if self.tick_count // 100 <= 0:
+        if self.tick_count // 50 <= 0:
             return
-        self.tick_count %= 100
+        self.tick_count %= 50
 
         threatened_planets = []
         safe_planets = []
@@ -70,7 +70,7 @@ class GameAi:
                 self.send_if_able(planet, unclaimed_planet[0], unclaimed_planet[1])
 
             if not in_danger:
-                self.try_upgrade_factory(planet)
+                # self.try_upgrade_factory(planet)
                 safe_planets.append(planet)
 
 
