@@ -147,7 +147,6 @@ class FortPlanet(Planet):
     cost = 10
     def __init__(self, position, color="#555555", drones=0, routes=[]):
         super().__init__(position, color, drones, routes)
-        self.ticks_per_drone *= 2
         self.vulnerability /= 2
 
     def tick(self, amount):

@@ -26,11 +26,6 @@ class Map:
         self.alert = alert
         self.alert_timer = 2000
 
-    def add_planet(self, position, size=100):
-        planet = Planet(position, size)
-        self.planets.append(planet)
-        return planet
-
     def add_route(self, planet1: Planet, planet2: Planet):
         route = Route(planet1, planet2)
         planet1.add_route(route)
@@ -150,7 +145,7 @@ class Map:
             planet_position = (planet_position[0]-(nearest_planet.position[0]-planet_position[0])*random.random(), planet_position[1]-(nearest_planet.position[1]-planet_position[1])*random.random())
         planet.position = planet_position
 
-    def random_generate(self, map_size, target_number_of_planets=10):
+    def random_generate(self, map_size, target_number_of_planets):
         self.map_rect = pygame.Rect(0, 0, map_size[0], map_size[1])
         for _ in range(target_number_of_planets):
             position = (random.randint(0, map_size[0]), random.randint(0, map_size[1]))
