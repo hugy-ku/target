@@ -67,7 +67,7 @@ class GameUi:
         if self.__map.get_active():
             info.append({
             "type": "text",
-            "text": f"Q - Turret Upgrade (10 Drones)\nE - Factory Upgrade ({FactoryPlanet.cost} Drones)",
+            "text": f"Q - Fort Upgrade (10 Drones)\nE - Factory Upgrade ({FactoryPlanet.cost} Drones)",
             "color": "#000000",
             "size": 50,
             "position": "bottomleft",
