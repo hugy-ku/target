@@ -101,6 +101,8 @@ class Map:
             new_route.replace_planet(origin, replacing)
         try:
             self.planets[self.planets.index(origin)] = replacing
+            if self.active and self.active == replacing:
+                self.active = None
         except ValueError:
             pass
 
