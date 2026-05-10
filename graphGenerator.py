@@ -53,7 +53,8 @@ class GraphGenerator:
         filename = self.__file_prefix / "fig_times.png"
 
         fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
-        plt.scatter(self.__data["realtime"]/1000, self.__data["gametime"]/1000)
+        ax.set_aspect("equal")
+        plt.scatter(self.__data["realtime"]/1000, self.__data["gametime"]/1000,)
         plt.title("Relation between in-game and real time")
         plt.xlabel("Real time (seconds)")
         plt.ylabel("In-game time (seconds)")
