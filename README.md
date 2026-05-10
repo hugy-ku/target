@@ -81,7 +81,7 @@ An AI is playing against you. I recommend pausing a lot!
 - Table in the statistics menu is not centered. Unfortunately row headers are not included in the centering calculation in matplotlib, so it is extremely hard to fix.
 - AI does not account for drones on Routes.
 - AI uses DFS when autosending when it should use BFS. (recursion does that)
-
+- Statistics sometimes count drones_destroyed *much* higher than drones_created, which should be impossible. I suspect it is related to the 1st bug, since it occurs rarely, and even when it does so, it is outrageously easy to spot.
 ---
 
 ## Unfinished Works
