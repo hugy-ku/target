@@ -130,7 +130,7 @@ class Map:
             return
         if isinstance(self.active, FortPlanet):
             self.active = None
-            self.set_alert("Planet is already a turret")
+            self.set_alert("Planet is already a fort")
             return
         if self.active.number_of_drones < FortPlanet.cost:
             self.set_alert(f"You need {FortPlanet.cost} drones to upgrade")
