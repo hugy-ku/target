@@ -98,7 +98,7 @@ class Route:
                 if drones["color"] != other_drones["color"] and drones["ticks"] >= other_drones["ticks"]-amount and drones["ticks"] <= other_drones["ticks"]+amount:
                     temp = drones["amount"]
                     total_destroyed += min(drones["amount"], int(other_drones["amount"]*max(1, drones["vulnerability"])))
-                    total_destroyed += min(other_drones["amount"], int(temp*max(1, other_drones["vulnerability"])))
+                    # total_destroyed += min(other_drones["amount"], int(temp*max(1, other_drones["vulnerability"])))
                     drones["amount"] -= int(other_drones["amount"])*max(1, drones["vulnerability"])
                     other_drones["amount"] -= int(temp*max(1, other_drones["vulnerability"]))
 
