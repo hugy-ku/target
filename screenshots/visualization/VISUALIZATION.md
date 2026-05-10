@@ -26,6 +26,6 @@ The chart clearly shows that in-game time and real-time are correlated, and that
 ![Distribution of drones spawned and destroyed](fig_drones.png)
 This is a stacked bar chart. The Y axis is a percentage that goes from 0% to 100% and the X axis are bins of the total amount of drones created, ranging from 350 to 2600. The objective is to find out whether there is a change in the ratio of drones at larger scales.
   
-The chart shows that the ratio of drones created versus destroyed does not meaningfully change the larger the scale of the game is. It is interesting, however, that it looks like the variance gets higher as the scale gets larger.  
+The chart shows that the ratio of drones created versus destroyed does not meaningfully change the larger the scale of the game is. I expected the ratio to go up since users might stockpile more, but this seems to not be the case.  
 
 <small>*Note for the graph: The text is a little small due to having to fit ranges in the X axis. I tried using matplotlib's histogram to put the labels between the bars but the function is not flexible enough to implement these types of graphs, so I had to use bar graphs.*</small>

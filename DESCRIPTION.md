@@ -22,17 +22,17 @@
   - Enemy AI! (the non-generative kind)
 
 - **Screenshots:**
-  - ![image_1](screenshots/gameplay/2.png)
-  - ![image_2](screenshots/gameplay/3.png)
-  - ![image_3](screenshots/gameplay/4.png)
-  - ![image_4](screenshots/gameplay/5.png)
-  - ![image_5](screenshots/gameplay/6.png)
+  - ![image_1](screenshots/gameplay/1.png)
+  - ![image_2](screenshots/gameplay/2.png)
+  - ![image_3](screenshots/gameplay/3.png)
+  - ![image_4](screenshots/gameplay/4.png)
+  - ![image_5](screenshots/gameplay/5.png)
 
 - **Proposal**
   - [Proposal PDF](proposal.pdf)
 
 - **Youtube Video**
-  - placeholder
+  - [Video Link](https://youtu.be/n0I0MipqOL4)
 
 ## 2. Concept
 
@@ -59,14 +59,13 @@ Projet Objective: Be a learning experience.
 - Stores the game display.
 - Manages the mainloop and input handling.
 - Source of tick() and render_tick().
-- Communicates with Map, GameUi, and RenderManager using their public functions.
+- Communicates with Map, GameUi, and RenderManager and sends inputs to them.
 - Stores and records statistics when the game ends.
 - Manages the game state (timescaling, pausing, etc.).
 
 ### Map
-- Communicates with MainGame.
 - Stores planets, routes, and AI.
-- Handles non-ui inputs.
+- Handles inputs to planets/routes.
 - Random map generation happens here.
 - Checks for when the game has ended also happens here.
 - Also functions as an API for manipulating/accessing planets/routes.
@@ -75,50 +74,49 @@ Projet Objective: Be a learning experience.
 
 ### Planet
 - Stores connected Routes in a list.
-- Tick function creates drones and updates their target positions. Returns amount of drones created in the tick to Map for statistics.
-- Manages total number of drones and visible drones
-- get_drones calculates whether the incoming drones are friendly, if its getting captured, or if it successfully defends. If it is getting captured, replace itself by returning a new planet to Route which returns to Map. In addition, return the amount of drones destroyed for statistics as well.
-- Can send drones to a connected route. Mostly handled by Map.
+- Tick function creates drones and updates their target positions. Also returns the amount of drones created for statistics.
+- get_drones calculates whether the incoming drones are friendly, if its getting captured, or if it successfully defends. If the drones are friendly, the amount of drones is added to the planet. If it is getting captured, replace itself by returning a new planet to Route which returns to Map. In addition, return the amount of drones destroyed for statistics as well.
+- Can send drones to a connected route, called by Map.
 - Render info is returned to Map for consolidation.
 
 ### UnclaimedPlanet, FactoryPlanet, FortPlanet
 - Inherits from Planet.
 - Changes Drone creation rate and vulnerability variable.
-- Was intended to change functions for some planets (for example TurretPlanet may change render_info to add a turret head and change tick to allow shooting drones), but due to time constraints this was scrapped.
+- Was intended to change functions for some planets (for example TurretPlanet may change render_info to add a turret head and change tick() to implement drone guns), but due to time constraints this was scrapped.
 
 ### Route
+- Connects two planets together.
 - Stores two planets (planet1 and planet2).
-- Calculates number of ticks needed to travel between planets (AKA weights in graphs).
+- Calculates number of ticks needed to travel between planets (AKA calculating weights).
 - Stores drones currently travelling on the route.
-- Tick is spaghetti code. moves all drones to their next positions. Once the drones travel to the end, remove from the stored list and call get_drones on the target planet. If opposing drones pass by each other, subtract them until only one group remains. Returns the replacement planet (if a planet gets captured) and number of destroyed drones to Map.
+- Tick is spaghetti code (sadly). moves all drones to their next positions. Once the drones travel to the end, remove from the stored list and call get_drones on the target planet. If opposing drones pass by each other, subtract them until only one group remains. Returns the replacement planet (if a planet gets captured) and number of destroyed drones to Map.
 - Render info is returned to Map for consolidation.
 
 ### Drone
 - Stores position, target position, and offset.
 - Ticking moves the drone close to the target position, and offset is so all drones aren't the exact same.
-- Offset is used for orbit distance from the planet and location when on a Route.
+- Offset is used for random orbit distance from the planet and location when on a Route.
 
 ### GameAi
-- Stores map for the current state of the game.
+- Access Map for information on the current state of the game.
 - Stores color so it knows which planets they own.
-- Many helper functions for the ticking.
-- Tick controls AI behavior. Unclaimed planets are captured as soon as possible, safe planets are upgraded to factories, planet in most danger requests all connected factories to autosend to it. Returns nothing since it is purely behavioral and does not affect rendering or statistics.
+- Many helper functions to simplify the tick() function.
+- Tick controls AI behavior. Unclaimed planets are captured as soon as possible, safe planets are upgraded to factories (not used since the AI was determined to be too hard), planet in most danger requests all connected factories to autosend to it. Returns nothing since it is purely behavioral and does not affect rendering or statistics.
 
 ### RenderManager
-- Manages the "viewport", a translation between the pixels on the monitor to the game map with arbitrary coordinates.
-- Manages the viewport's position and zoom, inputs are taken from MainGame.
-- Helper functions for converting positions (usually mouse position) on the screen to ingame coordinatesand vice versa.
-- Renders everything. Calls get_render_info from GameUi and Map to process. All render info is organized into nested dictionaries and lists.
+- Manages the "viewport", a translation between the pixels on the monitor to coordinates on the game map.
+- Manages the viewport's position and zoom, inputs are supplied from MainGame.
+- Renders everything. Calls get_render_info() from GameUi and Map to get rendering data. All rendering data is organized into nested dictionaries and lists.
 
 ### GameUi
-- manages the "UI rendering", which are usually texts, rects, and images. Includes timescale/pausing indicator, error alerts, and game end screen.
+- manages the "UI rendering", which are usually texts, rects, and images. Includes timescale/pausing indicator, error alerts, buttons, and graphs.
 - Manages Menu and StatisticsMenu
 - Manages input for UI which can be passed on to Menu and StatisticsMenu.
 
 ### Menu
-- Composed of 4 buttons (more can be added).
+- Composed of 4 buttons.
 - Toggled when user presses the escape key.
-- Handles input for when buttons are pressed. Returns the button's name if one *is* pressed. Goes to MainGame to handle the button input.
+- Handles input for when buttons are pressed. Returns the button's name if one *is* pressed. MainGame handles the returned name.
 
 ### Button
 - Stores a lot of attributes relating to rendering.
@@ -126,14 +124,14 @@ Projet Objective: Be a learning experience.
 
 ### StatisticsMenu
 - Self explanatory. Activated by pressing the "statistics" button in Menu.
-- Formats the graphs for RenderManager.
+- Formats the images generated by GraphGenerator into rendering data.
 - Handles input for switching graphs.
 - Calls GraphGenerator when switching to a new graph, and stores the newly made graph as a surface.
 
 ### GraphGenerator
 - Imports pandas, numpy, matplotlib for creating graphs.
 - Reads from statistics.csv and turns it into a table.
-- Graphs are generated and saved as .png files in screenshots/visualization
+- Graphs are generated and saved as .png files in screenshots/visualization.
 - Functions to switch graphs which returns file position for the graph.
 
 ## 5. Statistical Data
