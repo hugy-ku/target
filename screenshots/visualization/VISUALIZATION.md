@@ -28,4 +28,4 @@ This is a stacked bar chart. The Y axis is a percentage that goes from 0% to 100
   
 The chart shows that the ratio of drones created versus destroyed does not meaningfully change the larger the scale of the game is. It is interesting, however, that it looks like the variance gets higher as the scale gets larger.  
 
-<small>*Note for the graph: The text is a little small due to having to fit ranges in the X axis. I tried using matplotlib's histogram to put the labels between the bars but the function is not flexible enough to implement these types of graphs.*</small>
+<small>*Note for the graph: The text is a little small due to having to fit ranges in the X axis. I tried using matplotlib's histogram to put the labels between the bars but the function is not flexible enough to implement these types of graphs, so I had to use bar graphs.*</small>
