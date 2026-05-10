@@ -94,7 +94,7 @@ class Planet:
             attack_amount = math.ceil(amount*self.vulnerability)
             if self.number_of_drones <= attack_amount: # if planet gets captured
                 remaining_drones = int((attack_amount-self.number_of_drones)/self.vulnerability)
-                destroyed += self.number_of_drones*2
+                destroyed += self.number_of_drones + (amount-remaining_drones)
                 return (Planet(self.position, drone_color, remaining_drones, self.routes), destroyed)
             else:
                 destroyed += attack_amount + amount

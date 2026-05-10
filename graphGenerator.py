@@ -63,7 +63,7 @@ class GraphGenerator:
 
     def __generate_drones(self):
         filename = self.__file_prefix / "fig_drones.png"
-        fig, ax = plt.subplots(figsize=self.__figsize, dpi=300)
+        fig, ax = plt.subplots(figsize=(12,12), dpi=300)
 
         bin_size = 250
         bins = np.arange(

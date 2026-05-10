@@ -79,6 +79,8 @@ An AI is playing against you. I recommend pausing a lot!
 - Planets getting captured twice in one tick in the same Route messes up the map unrecoverably. Use the Restart button in the menu.
 - Map generation is a little wonky, routes may overlap and discerning which planets connect to which may be hard.
 - Table in the statistics menu is not centered. Unfortunately row headers are not included in the centering calculation in matplotlib, so it is extremely hard to fix.
+- AI does not account for drones on Routes.
+- AI uses DFS when autosending when it should use BFS. (recursion does that)
 
 ---
 
