@@ -94,7 +94,7 @@ class Planet:
             attack_amount = math.ceil(amount*self.vulnerability)
             if self.number_of_drones <= attack_amount: # if planet gets captured
                 remaining_drones = int((attack_amount-self.number_of_drones)/self.vulnerability)
-                destroyed += self.number_of_drones + remaining_drones
+                destroyed += self.number_of_drones*2
                 return (Planet(self.position, drone_color, remaining_drones, self.routes), destroyed)
             else:
                 destroyed += attack_amount + amount
@@ -110,7 +110,10 @@ class Planet:
             other_planet = self.autosend.get_other_planet(self)
             autosend = (other_planet.position[0]-self.position[0], other_planet.position[1]-self.position[1])
             distance = math.dist(other_planet.position, self.position)
-            autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
+            if distance == 0:
+                autosend = None
+            else:
+                autosend = (autosend[0]/distance*self.size, autosend[1]/distance*self.size)
         else: autosend = None
         render_info = {
             "type": "normal",
